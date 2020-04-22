@@ -1,0 +1,11 @@
+# macOS
+.DS_Store
+
+# Editor backup files
+*~
+
+# Ruby artifacts
+.bundle
+.yardoc
+Gemfile.lock
+*.gem
