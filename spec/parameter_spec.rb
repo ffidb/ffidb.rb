@@ -16,4 +16,25 @@ RSpec.describe FFIDB::Parameter do
     expect(b > c).to be false
     expect(a > c).to be false
   end
+
+  describe "#eql?" do
+    a_int  = Parameter.new(name: 'a', type: 'int')
+    a_long = Parameter.new(name: 'a', type: 'long')
+    b_int  = Parameter.new(name: 'b', type: 'int')
+    b_long = Parameter.new(name: 'b', type: 'long')
+
+    it "returns true when all attributes are equal" do
+      expect(a_int).to eql(a_int.dup)
+      expect(a_long).to eql(a_long.dup)
+      expect(b_int).to eql(b_int.dup)
+      expect(b_long).to eql(b_long.dup)
+    end
+
+    it "returns false otherwise" do
+      expect(a_int).to_not eql(a_long)
+      expect(a_long).to_not eql(a_int)
+      expect(b_int).to_not eql(a_int)
+      expect(b_long).to_not eql(a_int)
+    end
+  end
 end
