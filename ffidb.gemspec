@@ -38,5 +38,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec',     '>= 3.9'
   gem.add_development_dependency 'yard' ,     '>= 0.9'
   gem.add_development_dependency 'ffi-clang', '>= 0.6'
+  gem.add_runtime_dependency     'thor',      '~> 1.0'
   gem.post_install_message       = nil
 end
