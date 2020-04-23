@@ -15,7 +15,7 @@ module FFIDB
         file: location&.file,
         line: location&.line,
         comment: comment&.text,
-        parameters: [], # TODO: parse parameter declarations
+        parameters: [],
       )
     end
 

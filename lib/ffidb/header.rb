@@ -15,13 +15,22 @@ module FFIDB
       comment = translation_unit.cursor.comment&.text
 
       header = self.new(name: path.to_s, comment: comment, functions: [])
-      declarations.each do |declaration|
+      while declaration = declarations.shift
         location = declaration.location
         comment = declaration.comment
         case declaration.kind
           when :cursor_function
-            header.functions << FFIDB::Function.parse_declaration(declaration)
-          # TODO: other declarations
+            function = FFIDB::Function.parse_declaration(declaration)
+            while declaration = declarations.shift
+              case declaration.kind
+                 when :cursor_parm_decl
+                   function.parameters << FFIDB::Parameter.parse_declaration(declaration)
+                 else break
+              end
+            end
+            function.parameters.freeze
+            header.functions << function
+          else # TODO: other declarations of interest?
         end
       end
 

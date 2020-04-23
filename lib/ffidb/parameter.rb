@@ -7,7 +7,10 @@ module FFIDB
     ##
     # @param [FFI::Clang::Cursor] declaration
     def self.parse_declaration(declaration)
-      self.new() # TODO
+      self.new(
+        name: declaration.spelling,
+        type: declaration.type.spelling,
+      )
     end
 
     ##
