@@ -38,7 +38,7 @@ module FFIDB
     end
 
     ##
-    # @return [Boolean]
+    # @return [Integer]
     def <=>(other)
       self.name <=> other.name
     end

@@ -20,9 +20,41 @@ module FFIDB
     end
 
     ##
+    # @return [Integer]
+    def <=>(other) self.name <=> other.name end
+
+    ##
     # @return [Boolean]
-    def <=>(other)
-      self.name <=> other.name
+    def public?() self.name[0] != '_' end
+
+    ##
+    # @return [Boolean]
+    def nonpublic?() !(self.public?) end
+
+    ##
+    # @return [Boolean]
+    def nullary?() self.arity.zero? end
+
+    ##
+    # @return [Boolean]
+    def unary?() self.arity.equal?(1) end
+
+    ##
+    # @return [Boolean]
+    def binary?() self.arity.equal?(2) end
+
+    ##
+    # @return [Boolean]
+    def ternary?() self.arity.equal?(3) end
+
+    ##
+    # @return [Integer]
+    def arity() self.parameters.size end
+
+    ##
+    # @return [String]
+    def return_type
+      self.type.split('(', 2).first.strip
     end
   end # Function
 end # FFIDB
