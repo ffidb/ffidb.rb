@@ -1,12 +1,18 @@
 # This is free and unencumbered software released into the public domain.
 
+require 'pathname'
+
 module FFIDB
   class Header < Struct.new(:name, :comment, :functions, keyword_init: true)
     include Comparable
 
     ##
-    # @param [#to_s] path
-    def self.parse(path)
+    # @param [Pathname, #to_s] path
+    # @param [Pathname] base_directory
+    def self.parse(path, base_directory: nil)
+      path = path.is_a?(Pathname) ? path : Pathname(path.to_s)
+      name = (base_directory ? path.relative_path_from(base_directory) : path).to_s
+
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
 
       index = FFI::Clang::Index.new
@@ -14,13 +20,13 @@ module FFIDB
       declarations = translation_unit.cursor.select(&:declaration?)
       comment = translation_unit.cursor.comment&.text
 
-      header = self.new(name: path.to_s, comment: comment, functions: [])
+      header = self.new(name: name, comment: comment, functions: [])
       while declaration = declarations.shift
         location = declaration.location
         comment = declaration.comment
         case declaration.kind
           when :cursor_function
-            function = FFIDB::Function.parse_declaration(declaration)
+            function = FFIDB::Function.parse_declaration(declaration, base_directory: base_directory)
             while declaration = declarations.shift
               case declaration.kind
                  when :cursor_parm_decl

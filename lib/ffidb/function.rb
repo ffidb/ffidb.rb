@@ -1,18 +1,21 @@
 # This is free and unencumbered software released into the public domain.
 
+require 'pathname'
+
 module FFIDB
   class Function < Struct.new(:name, :type, :file, :line, :comment, :parameters, keyword_init: true)
     include Comparable
 
     ##
     # @param [FFI::Clang::Cursor] declaration
-    def self.parse_declaration(declaration)
+    # @param [Pathname] base_directory
+    def self.parse_declaration(declaration, base_directory: nil)
       location = declaration.location
       comment = declaration.comment
       self.new(
         name: declaration.spelling,
         type: declaration.type.spelling,
-        file: location&.file,
+        file: (base_directory && location) ? Pathname(location.file).relative_path_from(base_directory).to_s : location&.file,
         line: location&.line,
         comment: comment&.text,
         parameters: [],
