@@ -2,6 +2,8 @@
 
 module FFIDB
   class Header < Struct.new(:name, :comment, :functions, keyword_init: true)
+    include Comparable
+
     ##
     # @param [#to_s] path
     def self.parse(path)
@@ -24,6 +26,12 @@ module FFIDB
       end
 
       header
+    end
+
+    ##
+    # @return [Boolean]
+    def <=>(other)
+      self.name <=> other.name
     end
   end # Header
 end # FFIDB

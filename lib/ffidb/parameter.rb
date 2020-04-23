@@ -2,10 +2,18 @@
 
 module FFIDB
   class Parameter < Struct.new(:name, :type, keyword_init: true)
+    include Comparable
+
     ##
     # @param [FFI::Clang::Cursor] declaration
     def self.parse_declaration(declaration)
       self.new() # TODO
+    end
+
+    ##
+    # @return [Boolean]
+    def <=>(other)
+      self.name <=> other.name
     end
   end # Parameter
 end # FFIDB

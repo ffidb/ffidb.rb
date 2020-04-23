@@ -2,6 +2,8 @@
 
 module FFIDB
   class Function < Struct.new(:name, :type, :file, :line, :comment, :parameters, keyword_init: true)
+    include Comparable
+
     ##
     # @param [FFI::Clang::Cursor] declaration
     def self.parse_declaration(declaration)
@@ -15,6 +17,12 @@ module FFIDB
         comment: comment&.text,
         parameters: [], # TODO: parse parameter declarations
       )
+    end
+
+    ##
+    # @return [Boolean]
+    def <=>(other)
+      self.name <=> other.name
     end
   end # Function
 end # FFIDB
