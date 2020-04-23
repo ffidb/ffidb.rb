@@ -5,7 +5,8 @@ module FFIDB
     include Comparable
 
     ##
-    # @param [FFI::Clang::Cursor] declaration
+    # @param  [FFI::Clang::Cursor] declaration
+    # @return [Parameter]
     def self.parse_declaration(declaration)
       self.new(
         name: declaration.spelling,
@@ -14,6 +15,7 @@ module FFIDB
     end
 
     ##
+    # @param  [Parameter] other
     # @return [Integer]
     def <=>(other)
       self.name <=> other.name

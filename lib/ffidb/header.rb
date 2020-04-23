@@ -7,10 +7,11 @@ module FFIDB
     include Comparable
 
     ##
-    # @param [Pathname, #to_s] path
-    # @param [Pathname] base_directory
+    # @param  [Pathname, #to_s] path
+    # @param  [Pathname, #to_s] base_directory
+    # @return [Header]
     def self.parse(path, base_directory: nil)
-      path = path.is_a?(Pathname) ? path : Pathname(path.to_s)
+      path = Pathname(path.to_s) unless path.is_a?(Pathname)
       name = (base_directory ? path.relative_path_from(base_directory) : path).to_s
 
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
@@ -44,6 +45,7 @@ module FFIDB
     end
 
     ##
+    # @param  [Header] other
     # @return [Integer]
     def <=>(other)
       self.name <=> other.name
