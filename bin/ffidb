@@ -1,2 +1,44 @@
 #!/usr/bin/env ruby
 # This is free and unencumbered software released into the public domain.
+
+require 'thor' # https://rubygems.org/gems/thor
+
+class CLI < Thor
+  def self.exit_on_failure?; true; end
+
+  class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
+  class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
+
+  desc "export LIBRARY FUNCTION", "Export as Ruby code"
+  option :format, aliases: '-f', default: nil, desc: "Specify the output format"
+  def export(library, function)
+    p library, function if options[:debug] # TODO
+    warn "not implemented yet"
+  end
+
+  desc "list", "List libraries and functions"
+  def list
+    # TODO
+    warn "not implemented yet"
+  end
+
+  desc "parse HEADER...", "Parse .h header files"
+  def parse(*paths)
+    p paths if options[:debug] # TODO
+    warn "not implemented yet"
+  end
+
+  desc "search KEYWORD", "Search using a keyword"
+  def search(keyword)
+    p keyword if options[:debug] # TODO
+    warn "not implemented yet"
+  end
+
+  desc "show LIBRARY FUNCTION", "Show function information"
+  def show(library, function)
+    p library, function if options[:debug] # TODO
+    warn "not implemented yet"
+  end
+end # CLI
+
+CLI.start(ARGV)
