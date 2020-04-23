@@ -5,6 +5,9 @@ require_relative '../lib/ffidb'
 
 require 'thor' # https://rubygems.org/gems/thor
 
+require 'pathname'
+require 'yaml'
+
 class CLI < Thor
   def self.exit_on_failure?; true; end
 
@@ -14,32 +17,58 @@ class CLI < Thor
   desc "export LIBRARY FUNCTION", "Export as Ruby code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(library, function)
-    p library, function if options[:debug] # TODO
-    warn "not implemented yet"
+    p library, function if self.options[:debug]
+    warn "not implemented yet" # TODO
   end
 
   desc "list", "List libraries and functions"
   def list
-    # TODO
-    warn "not implemented yet"
+    warn "not implemented yet" # TODO
   end
 
   desc "parse HEADER...", "Parse .h header files"
   def parse(*paths)
-    p paths if options[:debug] # TODO
-    warn "not implemented yet"
+    begin
+      require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
+    rescue LoadError => error
+      p error if self.options[:debug]
+      abort error.to_s
+    end
+
+    counter = 0
+    paths.each do |path|
+      path = Pathname(path)
+      header = FFIDB::Header.parse(path, base_directory: path.dirname)
+      header.functions.sort.each do |function|
+        puts unless counter.zero?
+        p function if self.options[:debug]
+        counter += 1
+        puts "--- !function"
+        yaml = {
+          'name' => function.name,
+          'result' => function.return_type,
+        }
+        yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
+        yaml['comment'] = function.comment if function.comment && !function.comment.empty?
+        yaml['definition'] = {
+          'file' => function.file,
+          'line' => function.line,
+        }
+        puts YAML.dump(yaml).gsub("---\n", '')
+      end
+    end
   end
 
   desc "search KEYWORD", "Search using a keyword"
   def search(keyword)
-    p keyword if options[:debug] # TODO
-    warn "not implemented yet"
+    p keyword if self.options[:debug]
+    warn "not implemented yet" # TODO
   end
 
   desc "show LIBRARY FUNCTION", "Show function information"
   def show(library, function)
-    p library, function if options[:debug] # TODO
-    warn "not implemented yet"
+    p library, function if self.options[:debug]
+    warn "not implemented yet" # TODO
   end
 end # CLI
 

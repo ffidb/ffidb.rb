@@ -31,7 +31,8 @@ module FFIDB
             while declaration = declarations.shift
               case declaration.kind
                  when :cursor_parm_decl
-                   function.parameters << FFIDB::Parameter.parse_declaration(declaration)
+                   default_name = "_#{function.parameters.size + 1}"
+                   function.parameters << FFIDB::Parameter.parse_declaration(declaration, default_name: default_name)
                  else break
               end
             end
