@@ -51,8 +51,8 @@ class CLI < Thor
         yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
         yaml['comment'] = function.comment if function.comment && !function.comment.empty?
         yaml['definition'] = {
-          'file' => function.file,
-          'line' => function.line,
+          'file' => function.definition&.file,
+          'line' => function.definition&.line,
         }
         puts YAML.dump(yaml).gsub("---\n", '')
       end

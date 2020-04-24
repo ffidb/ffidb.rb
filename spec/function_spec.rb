@@ -86,10 +86,10 @@ RSpec.describe FFIDB::Function do
     end
   end
 
-  describe "#return_type" do
+  describe "#result_type" do
     it "returns only the function's return type" do
-      expect(Function.new(type: 'int (void)').return_type).to eq('int')
-      expect(Function.new(type: 'const char *(void)').return_type).to eq('const char *')
+      expect(Function.new(type: 'int (void)').result_type).to eq('int')
+      expect(Function.new(type: 'const char *(void)').result_type).to eq('const char *')
     end
   end
 end

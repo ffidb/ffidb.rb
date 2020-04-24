@@ -1,9 +1,11 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'location'
+
 require 'pathname'
 
 module FFIDB
-  class Function < Struct.new(:name, :type, :file, :line, :comment, :parameters, keyword_init: true)
+  class Function < Struct.new(:name, :type, :parameters, :comment, :definition, keyword_init: true)
     include Comparable
 
     ##
@@ -11,15 +13,12 @@ module FFIDB
     # @param  [Pathname, #to_s] base_directory
     # @return [Function]
     def self.parse_declaration(declaration, base_directory: nil)
-      location = declaration.location
-      comment = declaration.comment
       self.new(
         name: declaration.spelling,
         type: declaration.type.canonical.spelling,
-        file: (base_directory && location) ? Pathname(location.file).relative_path_from(base_directory).to_s : location&.file,
-        line: location&.line,
-        comment: comment&.text,
         parameters: [],
+        comment: declaration.comment&.text,
+        definition: Location.parse_clang_location(declaration.location, base_directory: base_directory),
       )
     end
 
@@ -58,8 +57,9 @@ module FFIDB
 
     ##
     # @return [String]
-    def return_type
+    def result_type
       self.type.split('(', 2).first.strip
     end
+    alias_method :return_type, :result_type
   end # Function
 end # FFIDB
