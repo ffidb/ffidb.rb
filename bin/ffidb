@@ -29,7 +29,19 @@ class CLI < Thor
   desc "parse HEADER...", "Parse .h header files"
   option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
   def parse(*paths)
-    paths.map! { |path| Pathname(path) }
+    base_directory = nil
+    paths = paths.inject([]) do |paths, path|
+      path = Pathname(path)
+      case
+        when !path.exist?
+          abort "#{$0}: path does not exist: #{path}"
+        when path.directory?
+          base_directory = path if base_directory.nil?
+          paths.concat(Dir["#{path}/**/*.h"].sort.map { |p| Pathname(p) })
+        else paths << path
+      end
+    end
+    base_directory = paths.first.dirname if base_directory.nil?
 
     begin
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
@@ -38,7 +50,7 @@ class CLI < Thor
       abort error.to_s
     end
 
-    FFIDB::Parser.new(base_directory: paths.first.dirname).tap do |parser|
+    FFIDB::Parser.new(base_directory: base_directory).tap do |parser|
       # Parse and define any given preprocessor symbols:
       (self.options[:define] || []).each do |var_and_val|
         var, val = var_and_val.split('=', 2)
