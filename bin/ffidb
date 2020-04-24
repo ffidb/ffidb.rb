@@ -27,7 +27,10 @@ class CLI < Thor
   end
 
   desc "parse HEADER...", "Parse .h header files"
+  option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
   def parse(*paths)
+    paths.map! { |path| Pathname(path) }
+
     begin
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
     rescue LoadError => error
@@ -35,26 +38,33 @@ class CLI < Thor
       abort error.to_s
     end
 
-    counter = 0
-    paths.each do |path|
-      path = Pathname(path)
-      header = FFIDB::Header.parse(path, base_directory: path.dirname)
-      header.functions.sort.each do |function|
-        puts unless counter.zero?
-        p function if self.options[:debug]
-        counter += 1
-        puts "--- !function"
-        yaml = {
-          'name' => function.name,
-          'result' => function.return_type,
-        }
-        yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
-        yaml['comment'] = function.comment if function.comment && !function.comment.empty?
-        yaml['definition'] = {
-          'file' => function.definition&.file,
-          'line' => function.definition&.line,
-        }
-        puts YAML.dump(yaml).gsub("---\n", '')
+    FFIDB::Parser.new(base_directory: paths.first.dirname).tap do |parser|
+      # Parse and define any given preprocessor symbols:
+      (self.options[:define] || []).each do |var_and_val|
+        var, val = var_and_val.split('=', 2)
+        val = '1' if val.nil?
+        parser.define! var, val
+      end
+
+      paths.each_with_index do |path, counter|
+        header = parser.parse_header(path)
+        header.functions.sort.each do |function|
+          puts unless counter.zero?
+          p function if self.options[:debug]
+          counter += 1
+          puts "--- !function"
+          yaml = {
+            'name' => function.name,
+            'result' => function.return_type,
+          }
+          yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
+          yaml['comment'] = function.comment if function.comment && !function.comment.empty?
+          yaml['definition'] = {
+            'file' => function.definition&.file,
+            'line' => function.definition&.line,
+          }
+          puts YAML.dump(yaml).gsub("---\n", '')
+        end
       end
     end
   end

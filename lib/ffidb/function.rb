@@ -9,20 +9,6 @@ module FFIDB
     include Comparable
 
     ##
-    # @param  [FFI::Clang::Cursor] declaration
-    # @param  [Pathname, #to_s] base_directory
-    # @return [Function]
-    def self.parse_declaration(declaration, base_directory: nil)
-      self.new(
-        name: declaration.spelling,
-        type: declaration.type.canonical.spelling,
-        parameters: [],
-        comment: declaration.comment&.text,
-        definition: Location.parse_clang_location(declaration.location, base_directory: base_directory),
-      )
-    end
-
-    ##
     # @param  [Function] other
     # @return [Integer]
     def <=>(other) self.name <=> other.name end
