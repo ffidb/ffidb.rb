@@ -42,7 +42,7 @@ class CLI < Thor
       # Parse and define any given preprocessor symbols:
       (self.options[:define] || []).each do |var_and_val|
         var, val = var_and_val.split('=', 2)
-        val = '1' if val.nil?
+        val = 1 if val.nil?
         parser.define! var, val
       end
 

@@ -5,6 +5,7 @@ require 'pathname'
 module FFIDB
   class Parser
     attr_reader :base_directory
+    attr_reader :defines
 
     ##
     # @param [Pathname, #to_s] base_directory
@@ -12,15 +13,16 @@ module FFIDB
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
 
       @base_directory = base_directory
+      @defines = {}
       @clang_index = FFI::Clang::Index.new
     end
 
     ##
-    # @param  [Symbol, #to_s] var
+    # @param  [Symbol, #to_sym] var
     # @param  [String, #to_s] val
     # @return [void]
-    def define!(var, val)
-      #p [var, val] # TODO
+    def define!(var, val = 1)
+      self.defines[var.to_sym] = val.to_s
     end
 
     ##
@@ -29,8 +31,9 @@ module FFIDB
     def parse_header(path)
       path = Pathname(path.to_s) unless path.is_a?(Pathname)
       name = (self.base_directory ? path.relative_path_from(self.base_directory) : path).to_s
+      args = self.defines.inject([]) { |r, (k, v)| r << "-D#{k}=#{v}" }
 
-      translation_unit = @clang_index.parse_translation_unit(path.to_s)
+      translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
       declarations = translation_unit.cursor.select(&:declaration?)
       comment = translation_unit.cursor.comment&.text
 
