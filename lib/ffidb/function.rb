@@ -15,7 +15,7 @@ module FFIDB
       comment = declaration.comment
       self.new(
         name: declaration.spelling,
-        type: declaration.type.spelling,
+        type: declaration.type.canonical.spelling,
         file: (base_directory && location) ? Pathname(location.file).relative_path_from(base_directory).to_s : location&.file,
         line: location&.line,
         comment: comment&.text,

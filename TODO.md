@@ -13,8 +13,3 @@ Parsing
 - Parse global variables in translation units
 - Detect variadic functions
 - Preserve function comments
-
-Semantic Analysis
------------------
-
-- Resolve type aliases (e.g., `uLong`) to their base types (`unsigned long`)

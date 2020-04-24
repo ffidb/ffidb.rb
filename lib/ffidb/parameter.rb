@@ -10,9 +10,10 @@ module FFIDB
     # @return [Parameter]
     def self.parse_declaration(declaration, default_name: '_')
       name = declaration.spelling
+      type = declaration.type.canonical.spelling
       self.new(
         name: (name.nil? || name.empty?) ? default_name.to_s : name,
-        type: declaration.type.spelling,
+        type: type,
       )
     end
 
