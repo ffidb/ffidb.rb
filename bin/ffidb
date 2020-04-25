@@ -14,29 +14,33 @@ class CLI < Thor
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
-  desc "export LIBRARY|FUNCTION...", "Export functions as C code"
+  desc "export LIBRARY|SYMBOL...", "Export functions as C/C++/Python/Ruby code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(*keywords)
     format = (self.options[:format] || 'c').to_sym
-    FFIDB::Registry.open do |registry|
-      exports = []
-      keywords.each do |keyword|
-        case library = registry.open_library(keyword)
-          when FFIDB::Library
-            library.each_function { |function| exports << [library.name, function] }
+    FFIDB::Exporter.for(format).new(**options).emit do |export|
+      FFIDB::Registry.open do |registry|
+        exports = []
+        keywords.each do |keyword|
+          if library = registry.open_library(keyword)
+            library.each_function { |function| exports << [library, function] }
           else
             keyword = Regexp.new('^' + Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.') + '$', Regexp::IGNORECASE)
             registry.find_functions(keyword) do |function, library|
-              exports << [library.name, function]
+              exports << [library, function]
             end
+          end
         end
-      end
-      exports.sort!.uniq.each do |library, function|
-        case format
-          when :c
-            parameters = function.parameters.each_value.inject([]) { |r, p| r << "#{p.type} #{p.name}" }
-            puts "#{function.type} #{function.name}(#{parameters.join(', ')});"
+        prev_library = nil
+        exports.sort!.uniq.each do |library, function|
+          if library != prev_library
+            export.finish_library if prev_library
+            export.begin_library(library)
+            prev_library = library
+          end
+          export.export_function(function)
         end
+        export.finish_library if prev_library
       end
     end
   end
@@ -123,7 +127,7 @@ class CLI < Thor
     end
   end
 
-  desc "show FUNCTION", "Show function information"
+  desc "show SYMBOL", "Show function information"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format" # TODO
   def show(function)
     p self.options, function if self.options[:debug]

@@ -8,6 +8,7 @@ module FFIDB
     attr_reader :name
     attr_reader :version
     attr_reader :path
+    attr_reader :soname
 
     ##
     # @param [String, #to_s] name
@@ -17,6 +18,7 @@ module FFIDB
       @name = name.to_s
       @version = (version || :stable).to_s
       @path = Pathname(path)
+      @soname = 'libz' # FIXME
     end
 
     ##
