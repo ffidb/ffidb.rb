@@ -36,5 +36,19 @@ module FFIDB
       library = Library.new(name, version, self.path.join(name.to_s))
       block_given? ? block.call(library) : library
     end
+
+    ##
+    # @param  [String, Regexp] keyword
+    # @yield  [function]
+    # @yield  [library]
+    # @return [Enumerator]
+    def find_functions(keyword, &block)
+      return self.to_enum(:find_functions) unless block_given?
+      self.each_library do |library|
+        library.each_function do |function|
+          yield function, library if keyword === function.name
+        end
+      end
+    end
   end # Registry
 end # FFIDB

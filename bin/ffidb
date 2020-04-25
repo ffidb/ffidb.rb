@@ -14,9 +14,9 @@ class CLI < Thor
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
-  desc "export LIBRARY FUNCTION", "Export as Ruby code"
+  desc "export LIBRARY|FUNCTION", "Export as Ruby code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  def export(library, function)
+  def export(library_or_function)
     p library, function if self.options[:debug]
     FFIDB::Registry.open do |registry|
       warn "not implemented yet" # TODO
@@ -94,15 +94,19 @@ class CLI < Thor
     end
   end
 
-  desc "search KEYWORD", "Search using a keyword"
+  desc "search KEYWORD", "Search for functions using a glob keyword"
   def search(keyword)
+    keyword = Regexp.new(Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.'), Regexp::IGNORECASE)
     p keyword if self.options[:debug]
     FFIDB::Registry.open do |registry|
-      warn "not implemented yet" # TODO
+      registry.find_functions(keyword) do |function, library|
+        puts "#{library.name}\t#{function.name}" # TODO: improve formatting
+      end
     end
   end
 
-  desc "show LIBRARY FUNCTION", "Show function information"
+  desc "show FUNCTION", "Show function information"
+  option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def show(library, function)
     p library, function if self.options[:debug]
     FFIDB::Registry.open do |registry|
