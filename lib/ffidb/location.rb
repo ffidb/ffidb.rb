@@ -7,5 +7,11 @@ module FFIDB
     def to_s
       "#{self.file}:#{self.line}"
     end
+
+    ##
+    # @return [Hash<Symbol, Object>]
+    def to_h
+      {file: self.file, line: self.line}
+    end
   end # Location
 end # FFIDB

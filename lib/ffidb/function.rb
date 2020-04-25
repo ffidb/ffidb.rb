@@ -3,9 +3,10 @@
 require_relative 'location'
 
 require 'pathname'
+require 'yaml'
 
 module FFIDB
-  class Function < Struct.new(:name, :type, :parameters, :comment, :definition, keyword_init: true)
+  class Function < Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
     include Comparable
 
     ##
@@ -47,5 +48,25 @@ module FFIDB
       self.type.split('(', 2).first.strip
     end
     alias_method :return_type, :result_type
+
+    ##
+    # @return [Hash<Symbol, Object>]
+    def to_h
+      {
+        name: self.name,
+        type: self.type,
+        parameters: self.parameters&.transform_values { |v| v.type },
+        definition: self.definition&.to_h,
+        comment: self.comment,
+      }
+    end
+
+    ##
+    # @return [String]
+    def to_yaml
+      YAML.dump(self.to_h.transform_keys!(&:to_s).transform_values do |v|
+        v.is_a?(Hash) ? v.transform_keys!(&:to_s) : v
+      end).gsub!("---\n", "--- !function\n")
+    end
   end # Function
 end # FFIDB

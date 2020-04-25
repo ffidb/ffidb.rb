@@ -68,8 +68,8 @@ module FFIDB
         name: declaration.spelling,
         type: declaration.type.canonical.spelling,
         parameters: [],
-        comment: declaration.comment&.text,
         definition: self.parse_location(declaration.location),
+        comment: declaration.comment&.text,
       )
     end
 

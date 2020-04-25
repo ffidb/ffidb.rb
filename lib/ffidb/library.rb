@@ -39,11 +39,11 @@ module FFIDB
                   name: yaml[:name],
                   type: yaml[:result], # FIXME
                   parameters: parameters,
-                  comment: yaml[:comment],
                   definition: !yaml.has_key?(:definition) ? nil : Location.new(
                     file: yaml.dig(:definition, 'file'),
                     line: yaml.dig(:definition, 'line'),
                   ),
+                  comment: yaml[:comment],
                 )
             end
           end

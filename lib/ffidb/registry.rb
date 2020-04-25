@@ -44,11 +44,16 @@ module FFIDB
     # @return [Enumerator]
     def find_functions(keyword, &block)
       return self.to_enum(:find_functions) unless block_given?
+      count = 0
       self.each_library do |library|
         library.each_function do |function|
-          yield function, library if keyword === function.name
+          if keyword === function.name
+            count += 1
+            yield function, library
+          end
         end
       end
+      count > 0 ? count : nil
     end
   end # Registry
 end # FFIDB

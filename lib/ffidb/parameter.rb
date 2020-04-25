@@ -12,7 +12,13 @@ module FFIDB
     end
 
     ##
-    # @return [Hash<String, String>]
+    # @return [String]
+    def to_s
+      "#{self.name}: #{self.type}"
+    end
+
+    ##
+    # @return [Hash<Symbol, String>]
     def to_h
       {self.name => self.type}
     end

@@ -17,7 +17,7 @@ class CLI < Thor
   desc "export LIBRARY|FUNCTION", "Export as Ruby code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(library_or_function)
-    p library, function if self.options[:debug]
+    p self.options, library_or_function if self.options[:debug]
     FFIDB::Registry.open do |registry|
       warn "not implemented yet" # TODO
     end
@@ -83,11 +83,11 @@ class CLI < Thor
             'result' => function.return_type,
           }
           yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
-          yaml['comment'] = function.comment if function.comment && !function.comment.empty?
           yaml['definition'] = {
             'file' => function.definition&.file,
             'line' => function.definition&.line,
           }
+          yaml['comment'] = function.comment if function.comment && !function.comment.empty?
           puts YAML.dump(yaml).gsub("---\n", '')
         end
       end
@@ -97,7 +97,7 @@ class CLI < Thor
   desc "search KEYWORD", "Search for functions using a glob keyword"
   def search(keyword)
     keyword = Regexp.new(Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.'), Regexp::IGNORECASE)
-    p keyword if self.options[:debug]
+    p self.options, keyword if self.options[:debug]
     FFIDB::Registry.open do |registry|
       registry.find_functions(keyword) do |function, library|
         puts "#{library.name}\t#{function.name}" # TODO: improve formatting
@@ -106,11 +106,15 @@ class CLI < Thor
   end
 
   desc "show FUNCTION", "Show function information"
-  option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  def show(library, function)
-    p library, function if self.options[:debug]
+  option :format, aliases: '-f', default: nil, desc: "Specify the output format" # TODO
+  def show(function)
+    p self.options, function if self.options[:debug]
     FFIDB::Registry.open do |registry|
-      warn "not implemented yet" # TODO
+      found = registry.find_functions(function) do |function, library|
+        puts function.to_yaml
+        puts
+      end
+      abort "#{$0}: function not found: #{function}" unless found
     end
   end
 end # CLI
