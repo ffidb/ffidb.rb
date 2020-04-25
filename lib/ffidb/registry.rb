@@ -24,15 +24,16 @@ module FFIDB
     # @return [Enumerator]
     def each_library(&block)
       return self.to_enum(:each_library) unless block_given?
-      # TODO
+      # FIXME: iterate over directory entries
       yield self.open_library(:curl)
       yield self.open_library(:musl)
       yield self.open_library(:zlib)
     end
 
     ##
-    # @param. [String, #to_s] name
+    # @param  [String, #to_s] name
     def open_library(name, version = nil, &block)
+      return nil unless %w(curl musl zlib).include?(name.to_s) # FIXME
       library = Library.new(name, version, self.path.join(name.to_s))
       block_given? ? block.call(library) : library
     end

@@ -14,12 +14,30 @@ class CLI < Thor
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
-  desc "export LIBRARY|FUNCTION", "Export as Ruby code"
+  desc "export LIBRARY|FUNCTION...", "Export functions as C code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  def export(library_or_function)
-    p self.options, library_or_function if self.options[:debug]
+  def export(*keywords)
+    format = (self.options[:format] || 'c').to_sym
     FFIDB::Registry.open do |registry|
-      warn "not implemented yet" # TODO
+      exports = []
+      keywords.each do |keyword|
+        case library = registry.open_library(keyword)
+          when FFIDB::Library
+            library.each_function { |function| exports << [library.name, function] }
+          else
+            keyword = Regexp.new('^' + Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.') + '$', Regexp::IGNORECASE)
+            registry.find_functions(keyword) do |function, library|
+              exports << [library.name, function]
+            end
+        end
+      end
+      exports.sort!.uniq.each do |library, function|
+        case format
+          when :c
+            parameters = function.parameters.each_value.inject([]) { |r, p| r << "#{p.type} #{p.name}" }
+            puts "#{function.type} #{function.name}(#{parameters.join(', ')});"
+        end
+      end
     end
   end
 
@@ -28,10 +46,10 @@ class CLI < Thor
     FFIDB::Registry.open do |registry|
       registry.each_library do |library|
         p library if self.options[:debug]
-        print "#{library.name}"
-        puts self.options[:verbose] ? "@#{library.version}" : '' # TODO: resolve stable symlinks
         library.each_function do |function|
           p function if self.options[:debug]
+          print "#{library.name}"
+          print self.options[:verbose] ? "@#{library.version}" : '' # TODO: resolve stable symlinks
           print "\t#{function.name}"
           puts self.options[:verbose] ? "\t\t// #{function.definition.to_s}" : '' # TODO: improve formatting
         end
