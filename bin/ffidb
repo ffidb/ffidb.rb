@@ -18,12 +18,25 @@ class CLI < Thor
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(library, function)
     p library, function if self.options[:debug]
-    warn "not implemented yet" # TODO
+    FFIDB::Registry.open do |registry|
+      warn "not implemented yet" # TODO
+    end
   end
 
   desc "list", "List libraries and functions"
   def list
-    warn "not implemented yet" # TODO
+    FFIDB::Registry.open do |registry|
+      registry.each_library do |library|
+        p library if self.options[:debug]
+        print "#{library.name}"
+        puts self.options[:verbose] ? "@#{library.version}" : '' # TODO: resolve stable symlinks
+        library.each_function do |function|
+          p function if self.options[:debug]
+          print "\t#{function.name}"
+          puts self.options[:verbose] ? "\t\t// #{function.definition.to_s}" : '' # TODO: improve formatting
+        end
+      end
+    end
   end
 
   desc "parse HEADER...", "Parse .h header files"
@@ -84,13 +97,17 @@ class CLI < Thor
   desc "search KEYWORD", "Search using a keyword"
   def search(keyword)
     p keyword if self.options[:debug]
-    warn "not implemented yet" # TODO
+    FFIDB::Registry.open do |registry|
+      warn "not implemented yet" # TODO
+    end
   end
 
   desc "show LIBRARY FUNCTION", "Show function information"
   def show(library, function)
     p library, function if self.options[:debug]
-    warn "not implemented yet" # TODO
+    FFIDB::Registry.open do |registry|
+      warn "not implemented yet" # TODO
+    end
   end
 end # CLI
 
