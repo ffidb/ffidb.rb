@@ -48,6 +48,18 @@ class CLI < Thor
     abort "#{$0}: #{error}"
   end
 
+  desc "init", "Initialize the registry (at: ~/.ffidb)"
+  def init
+    registry_path = FFIDB::Registry.default_path
+    return if registry_path.exist?
+    system %Q(git clone #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path}) # TODO: improve this
+    exit $?.exitstatus if $?.exitstatus.nonzero?
+    Dir.chdir registry_path
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
+  end
+
   desc "list", "List libraries and functions"
   def list
     FFIDB::Registry.open do |registry|
@@ -75,7 +87,7 @@ class CLI < Thor
       path = Pathname(path)
       case
         when !path.exist?
-          abort "#{$0}: path does not exist: #{path}"
+          raise "Path does not exist: #{path}"
         when path.directory?
           base_directory = path if base_directory.nil?
           paths.concat(Dir["#{path}/**/*.h"].sort.map { |p| Pathname(p) })
@@ -148,8 +160,20 @@ class CLI < Thor
         puts function.to_yaml
         puts
       end
-      abort "#{$0}: function not found: #{function}" unless found
+      raise "Function not found: #{function}" unless found
     end
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
+  end
+
+  desc "update", "Fetch updates to the registry (at: ~/.ffidb)"
+  def update
+    registry_path = FFIDB::Registry.default_path
+    raise "Registry at #{registry_path} not initialized (run `#{$0} init` first?)" unless registry_path.exist?
+    Dir.chdir registry_path
+    system %Q(git pull) # TODO: improve this
+    exit $?.exitstatus if $?.exitstatus.nonzero?
   rescue => error
     p error if self.options[:debug]
     abort "#{$0}: #{error}"

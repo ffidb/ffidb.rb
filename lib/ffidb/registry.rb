@@ -6,7 +6,15 @@ require 'pathname'
 
 module FFIDB
   class Registry
+    GIT_HTTPS_URL = 'https://github.com/ffidb/ffidb.git'.freeze
+
     attr_reader :path
+
+    ##
+    # @return [Pathname]
+    def self.default_path
+      Pathname(ENV['HOME']).join('.ffidb')
+    end
 
     ##
     # @param [Pathname, #to_s] path
@@ -19,7 +27,7 @@ module FFIDB
     # @param [Pathname, #to_s] path
     # @raise [RegistryVersionMismatch] if this version of FFIDB.rb is unable to open the registry
     def initialize(path = nil)
-      @path = Pathname(path || Pathname(ENV['HOME']).join('.ffidb'))
+      @path = Pathname(path || self.class.default_path)
 
       if (version_file = @path.join('.cli-version')).exist?
         min_version = version_file.read.chomp.split('.').map(&:to_i)
