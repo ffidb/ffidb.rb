@@ -1,5 +1,6 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'ffidb/errors'
 require_relative 'ffidb/exporter'
 require_relative 'ffidb/exporters'
 require_relative 'ffidb/function'

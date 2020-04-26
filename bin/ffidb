@@ -18,8 +18,8 @@ class CLI < Thor
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(*keywords)
     format = (self.options[:format] || 'c').to_sym
-    FFIDB::Exporter.for(format).new(**options).emit do |export|
-      FFIDB::Registry.open do |registry|
+    FFIDB::Registry.open do |registry|
+      FFIDB::Exporter.for(format).new(**options).emit do |export|
         exports = []
         keywords.each do |keyword|
           if library = registry.open_library(keyword)
@@ -43,6 +43,9 @@ class CLI < Thor
         export.finish_library if prev_library
       end
     end
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
   end
 
   desc "list", "List libraries and functions"
@@ -59,6 +62,9 @@ class CLI < Thor
         end
       end
     end
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
   end
 
   desc "parse HEADER...", "Parse .h header files"
@@ -114,6 +120,9 @@ class CLI < Thor
         end
       end
     end
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
   end
 
   desc "search KEYWORD", "Search for functions using a glob keyword"
@@ -125,6 +134,9 @@ class CLI < Thor
         puts "#{library.name}\t#{function.name}" # TODO: improve formatting
       end
     end
+  rescue => error
+    abort "#{$0}: #{error}"
+    p error if self.options[:debug]
   end
 
   desc "show SYMBOL", "Show function information"
@@ -138,6 +150,9 @@ class CLI < Thor
       end
       abort "#{$0}: function not found: #{function}" unless found
     end
+  rescue => error
+    p error if self.options[:debug]
+    abort "#{$0}: #{error}"
   end
 end # CLI
 

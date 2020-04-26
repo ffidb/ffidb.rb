@@ -1,5 +1,7 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'errors'
+
 require 'pathname'
 
 module FFIDB
@@ -15,8 +17,16 @@ module FFIDB
 
     ##
     # @param [Pathname, #to_s] path
+    # @raise [RegistryVersionMismatch] if this version of FFIDB.rb is unable to open the registry
     def initialize(path = nil)
       @path = Pathname(path || Pathname(ENV['HOME']).join('.ffidb'))
+
+      if (version_file = @path.join('.cli-version')).exist?
+        min_version = version_file.read.chomp.split('.').map(&:to_i)
+        if (FFIDB::VERSION.to_a <=> min_version).negative?
+          raise RegistryVersionMismatch, "FFIDB.rb #{min_version.join('.')}+ is required for the registry directory #{@path}"
+        end
+      end
     end
 
     ##
