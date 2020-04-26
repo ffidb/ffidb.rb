@@ -66,7 +66,7 @@ module FFIDB
     def parse_function(declaration)
       FFIDB::Function.new(
         name: declaration.spelling,
-        type: declaration.type.canonical.spelling,
+        type: declaration.type.canonical.spelling, # FIXME
         parameters: [],
         definition: self.parse_location(declaration.location),
         comment: declaration.comment&.text,
@@ -75,15 +75,29 @@ module FFIDB
 
     ##
     # @param  [FFI::Clang::Cursor] declaration
-    # @param. [String, #to_s] default_name
+    # @param  [String, #to_s] default_name
     # @return [Parameter]
     def parse_parameter(declaration, default_name: '_')
       name = declaration.spelling
-      type = declaration.type.canonical.spelling
+      type = self.parse_type(declaration.type)
       FFIDB::Parameter.new(
         name: (name.nil? || name.empty?) ? default_name.to_s : name,
         type: type,
       )
+    end
+
+    ##
+    # @param  [FFI::Clang::Type] type
+    # @return [String]
+    def parse_type(type)
+      ostensible_type = type.spelling
+      canonical_type = case ostensible_type
+        when '_Bool'  then ostensible_type                          # <stdbool.h>
+        when 'size_t' then ostensible_type                          # <stddef.h>
+        when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then ostensible_type # <stdint.h>
+        when /^u?intptr_t$/ then ostensible_type                    # <stdint.h>
+        else type.canonical.spelling
+      end
     end
 
     ##
