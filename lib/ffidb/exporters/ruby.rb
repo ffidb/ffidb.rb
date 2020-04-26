@@ -20,7 +20,7 @@ module FFIDB::Exporters
       puts <<~EOS
       module #{library.name.capitalize}
         extend FFI::Library
-        ffi_lib ['#{library.soname}']
+        ffi_lib [#{library.objects.map(&:inspect).join(', ')}, "#{library.dlopen}"]
       EOS
       puts
     end
