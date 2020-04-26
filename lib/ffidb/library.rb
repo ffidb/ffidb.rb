@@ -18,7 +18,7 @@ module FFIDB
       @name = name.to_s
       @version = (version || :stable).to_s
       @path = Pathname(path)
-      @soname = 'libz' # FIXME
+      @soname = 'z' # FIXME
     end
 
     ##

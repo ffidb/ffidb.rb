@@ -3,6 +3,10 @@
 require_relative '../exporter'
 
 module FFIDB::Exporters
+  ##
+  # Code generator for the Python programming language (using ctypes).
+  #
+  # @see https://docs.python.org/3/library/ctypes.html
   class Python < FFIDB::Exporter
     def begin
       puts "# #{FFIDB.header}"
@@ -13,7 +17,7 @@ module FFIDB::Exporters
     def begin_library(library)
       @library = library
       puts
-      puts "#{library.name} = ctypes.CDLL(ctypes.util.find_library('#{library.soname}'))"
+      puts "#{library.name} = ctypes.CDLL(ctypes.util.find_library('#{library.soname}') or '#{library.soname}')"
     end
 
     def export_function(function)

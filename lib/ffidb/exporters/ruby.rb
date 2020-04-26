@@ -3,6 +3,10 @@
 require_relative '../exporter'
 
 module FFIDB::Exporters
+  ##
+  # Code generator for the Ruby programming language (using FFI).
+  #
+  # @see https://github.com/ffi/ffi/wiki
   class Ruby < FFIDB::Exporter
     def begin
       puts "# #{FFIDB.header}"

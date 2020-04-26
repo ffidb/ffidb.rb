@@ -14,7 +14,7 @@ class CLI < Thor
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
-  desc "export LIBRARY|SYMBOL...", "Export functions as C/C++/Python/Ruby code"
+  desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
   def export(*keywords)
     format = (self.options[:format] || 'c').to_sym

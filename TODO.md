@@ -13,3 +13,8 @@ Parsing
 - Parse global variables in translation units
 - Detect variadic functions
 - Preserve function comments
+
+Type Conversion
+---------------
+
+- Improve type conversion in Dart code generation

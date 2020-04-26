@@ -3,6 +3,8 @@
 require_relative '../exporter'
 
 module FFIDB::Exporters
+  ##
+  # Code generator for the C++ programming language.
   class Cpp < FFIDB::Exporter
     def begin
       puts "// #{FFIDB.header}"

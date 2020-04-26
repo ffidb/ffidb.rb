@@ -7,9 +7,12 @@ module FFIDB
       case format&.to_sym
         when :c then Exporters::C
         when :cpp, :cxx, :'c++' then Exporters::Cpp
+        when :dart, :flutter then Exporters::Dart
+        when :java, :jna then Exporters::Java
+        when :lisp, :'common-lisp' then Exporters::Lisp
         when :python, :py then Exporters::Python
         when :ruby, :rb then Exporters::Ruby
-        # TODO: dart, go, java, lisp, ocaml, php, racket, ruby, zig
+        # TODO: go, ocaml, php, racket, zig
         else raise "unknown output format: #{format}"
       end
     end
