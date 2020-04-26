@@ -8,6 +8,46 @@ module FFIDB::Exporters
   #
   # @see https://common-lisp.net/project/cffi/
   class Lisp < FFIDB::Exporter
+    # @see https://common-lisp.net/project/cffi/manual/html_node/Foreign-Types.html
+    TYPE_MAP = {
+      'void'               => :void,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # <stddef.h>
+      'size_t'             => :uint, # TODO
+      # <stdint.h>
+      'int8_t'             => :int8,
+      'int16_t'            => :int16,
+      'int32_t'            => :int32,
+      'int64_t'            => :int64,
+      'uint8_t'            => :uint8,
+      'uint16_t'           => :uint16,
+      'uint32_t'           => :uint32,
+      'uint64_t'           => :uint64,
+      'intptr_t'           => :pointer,
+      'uintptr_t'          => :pointer,
+      # standard signed-integer types:
+      'char'               => :char,
+      'short'              => :short,
+      'int'                => :int,
+      'long'               => :long,
+      'long long'          => :llong,
+      # standard unsigned-integer types:
+      'unsigned char'      => :uchar,
+      'unsigned short'     => :ushort,
+      'unsigned int'       => :uint,
+      'unsigned long'      => :ulong,
+      'unsigned long long' => :ullong,
+      # standard floating-point types:
+      'float'              => :float,
+      'double'             => :double,
+      # standard character-sequence types:
+      'char *'             => :string,
+      'const char *'       => :string,
+      # miscellaneous types:
+      nil                  => :pointer,
+    }
+
     def begin
       puts "; #{FFIDB.header}"
       puts
@@ -40,21 +80,7 @@ module FFIDB::Exporters
     # @param  [String] c_type
     # @return [Symbol]
     def cffi_type(c_type)
-      # See: https://common-lisp.net/project/cffi/manual/html_node/Foreign-Types.html
-      case c_type
-        when 'void' then :void
-        when '_Bool' then :bool
-        when 'float', 'double' then c_type.to_sym
-        when 'char', 'short', 'int', 'long' then c_type.to_sym
-        when 'long long' then :llong
-        when 'unsigned char' then :uchar
-        when 'unsigned short' then :ushort
-        when 'unsigned int' then :uint
-        when 'unsigned long' then :ulong
-        when 'unsigned long long' then :ullong
-        when 'char *', 'const char *' then :string
-        else :pointer # DEBUG: "<<<<#{c_type}>>>>"
-      end
+      TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
     end
   end # Lisp
 end # FFIDB::Exporters

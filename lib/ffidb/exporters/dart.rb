@@ -10,6 +10,70 @@ module FFIDB::Exporters
   # @see https://flutter.dev/docs/development/platform-integration/c-interop
   # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
   class Dart < FFIDB::Exporter
+    # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
+    TYPE_MAP_FFI = {
+      'void'               => :Void,
+      # <stdbool.h>
+      '_Bool'              => :Int8, # TODO
+      # <stddef.h>
+      'size_t'             => :Uint64, # TODO
+      # <stdint.h>
+      'int8_t'             => :Int8,
+      'int16_t'            => :Int16,
+      'int32_t'            => :Int32,
+      'int64_t'            => :Int64,
+      'uint8_t'            => :Uint8,
+      'uint16_t'           => :Uint16,
+      'uint32_t'           => :Uint32,
+      'uint64_t'           => :Uint64,
+      'intptr_t'           => :IntPtr,
+      'uintptr_t'          => :IntPtr,
+      # standard signed-integer types:
+      'char'               => :Int8,
+      'short'              => :Int16,
+      'int'                => :Int32,
+      'long'               => :Int64, # TODO
+      'long long'          => :Int64,
+      # standard unsigned-integer types:
+      'unsigned char'      => :Uint8,
+      'unsigned short'     => :Uint16,
+      'unsigned int'       => :Uint32,
+      'unsigned long'      => :Uint64, # TODO
+      'unsigned long long' => :Uint64,
+      # standard floating-point types:
+      'float'              => :Float,
+      'double'             => :Double,
+      # standard character-sequence types:
+      'char *'             => 'Pointer<ffi.Int8>', # TODO: Utf8
+      'const char *'       => 'Pointer<ffi.Int8>', # TODO: Utf8
+      # miscellaneous types:
+      nil                  => 'Pointer<ffi.Void>',
+    }
+
+    # @see https://dart.dev/guides/language/language-tour
+    TYPE_MAP_DART = {
+      'void'               => :void,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # standard signed-integer types:
+      'char'               => :int,
+      'short'              => :int,
+      'int'                => :int,
+      'long'               => :int,
+      'long long'          => :int,
+      # standard unsigned-integer types:
+      'unsigned char'      => :int,
+      'unsigned short'     => :int,
+      'unsigned int'       => :int,
+      'unsigned long'      => :int,
+      'unsigned long long' => :int,
+      # standard floating-point types:
+      'float'              => :double,
+      'double'             => :double,
+      # miscellaneous types:
+      nil                  => nil,
+    }
+
     def begin
       puts "// #{FFIDB.header}"
       puts
@@ -43,44 +107,15 @@ module FFIDB::Exporters
     ##
     # @param  [String] c_type
     # @return [#to_s]
-    # @see https://dart.dev/guides/language/language-tour
     def dart_type(c_type)
-      case c_type
-        when 'void' then :void
-        when '_Bool' then :bool
-        when 'float', 'double' then :double
-        when 'char', 'short', 'int', 'long', 'long long' then :int
-        when 'unsigned char' then :int
-        when 'unsigned short' then :int
-        when 'unsigned int' then :int
-        when 'unsigned long' then :int
-        when 'unsigned long long' then :int
-        else self.ffi_type(c_type)
-      end
+      TYPE_MAP_DART[c_type.to_s] || self.ffi_type(c_type)
     end
 
     ##
     # @param  [String] c_type
     # @return [#to_s]
-    # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
     def ffi_type(c_type)
-      ffi_type = case c_type
-        when 'void' then :Void
-        when '_Bool' then :Int8 # FIXME
-        when 'float', 'double' then c_type.capitalize.to_sym
-        when 'char' then :Int8
-        when 'short' then :Int16
-        when 'int' then :Int32
-        when 'long' then :Int64 # FIXME
-        when 'long long' then :Int64
-        when 'unsigned char' then :Uint8
-        when 'unsigned short' then :Uint16
-        when 'unsigned int' then :Uint32
-        when 'unsigned long' then :Uint64 # FIXME
-        when 'unsigned long long' then :Uint64
-        when 'char *', 'const char *' then 'Pointer<ffi.Int8>'
-        else 'Pointer<ffi.Void>' # DEBUG: "<<<<#{c_type}>>>>"
-      end
+      ffi_type = TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
       "ffi.#{ffi_type}"
     end
   end # Dart

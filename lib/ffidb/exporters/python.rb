@@ -8,6 +8,46 @@ module FFIDB::Exporters
   #
   # @see https://docs.python.org/3/library/ctypes.html
   class Python < FFIDB::Exporter
+    # @see https://docs.python.org/3/library/ctypes.html
+    TYPE_MAP = {
+      'void'               => :None,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # <stddef.h>
+      'size_t'             => :size_t,
+      # <stdint.h>
+      'int8_t'             => :int8,
+      'int16_t'            => :int16,
+      'int32_t'            => :int32,
+      'int64_t'            => :int64,
+      'uint8_t'            => :uint8,
+      'uint16_t'           => :uint16,
+      'uint32_t'           => :uint32,
+      'uint64_t'           => :uint64,
+      'intptr_t'           => :void_p,
+      'uintptr_t'          => :void_p,
+      # standard signed-integer types:
+      'char'               => :char,
+      'short'              => :short,
+      'int'                => :int,
+      'long'               => :long,
+      'long long'          => :longlong,
+      # standard unsigned-integer types:
+      'unsigned char'      => :ubyte,
+      'unsigned short'     => :ushort,
+      'unsigned int'       => :uint,
+      'unsigned long'      => :ulong,
+      'unsigned long long' => :ulonglong,
+      # standard floating-point types:
+      'float'              => :float,
+      'double'             => :double,
+      # standard character-sequence types:
+      'char *'             => :char_p,
+      'const char *'       => :char_p,
+      # miscellaneous types:
+      nil                  => :void_p,
+    }
+
     def begin
       puts "# #{FFIDB.header}"
       puts
@@ -34,25 +74,13 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [String] c_type
+    # @param  [String, #to_s] c_type
     # @return [String]
     def py_type(c_type)
-      # See: https://docs.python.org/3/library/ctypes.html
-      py_type = case c_type
-        when 'void' then nil # None
-        when '_Bool' then :bool
-        when 'float', 'double' then c_type.to_sym
-        when 'char', 'short', 'int', 'long' then c_type.to_sym
-        when 'long long' then :longlong
-        when 'unsigned char' then :ubyte
-        when 'unsigned short' then :ushort
-        when 'unsigned int' then :uint
-        when 'unsigned long' then :ulong
-        when 'unsigned long long' then :ulonglong
-        when 'char *', 'const char *' then :char_p
-        else :void_p # DEBUG: "<<<<#{c_type}>>>>"
+      case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
+        when :None then py_type.to_s
+        else "ctypes.c_#{py_type}"
       end
-      py_type ? "ctypes.c_#{py_type}" : 'None'
     end
   end # Python
 end # FFIDB::Exporters

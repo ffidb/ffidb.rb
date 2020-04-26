@@ -8,6 +8,47 @@ module FFIDB::Exporters
   #
   # @see https://github.com/java-native-access/jna/blob/master/www/GettingStarted.md
   class Java < FFIDB::Exporter
+    # @see https://github.com/java-native-access/jna/blob/master/www/Mappings.md
+    # @see https://java-native-access.github.io/jna/5.5.0/javadoc/overview-summary.html#marshalling
+    TYPE_MAP = {
+      'void'               => :void,
+      # <stdbool.h>
+      '_Bool'              => :boolean,
+      # <stddef.h>
+      'size_t'             => :size_t, # https://github.com/java-native-access/jna/issues/1113
+      # <stdint.h>
+      'int8_t'             => :byte,
+      'int16_t'            => :short,
+      'int32_t'            => :int,
+      'int64_t'            => :long,
+      'uint8_t'            => :byte,
+      'uint16_t'           => :short,
+      'uint32_t'           => :int,
+      'uint64_t'           => :long,
+      'intptr_t'           => :Pointer,
+      'uintptr_t'          => :Pointer,
+      # standard signed-integer types:
+      'char'               => :byte,
+      'short'              => :short,
+      'int'                => :int,
+      'long'               => :NativeLong,
+      'long long'          => :long,
+      # standard unsigned-integer types:
+      'unsigned char'      => :byte,
+      'unsigned short'     => :short,
+      'unsigned int'       => :int,
+      'unsigned long'      => :NativeLong,
+      'unsigned long long' => :long,
+      # standard floating-point types:
+      'float'              => :float,
+      'double'             => :double,
+      # standard character-sequence types:
+      'char *'             => :String,
+      'const char *'       => :String,
+      # miscellaneous types:
+      nil                  => :Pointer,
+    }
+
     def begin
       puts "// #{FFIDB.header}"
       puts
@@ -16,6 +57,7 @@ module FFIDB::Exporters
       import com.sun.jna.Native;
       import com.sun.jna.NativeLong;
       import com.sun.jna.Pointer;
+      import com.sun.jna.Structure.FFIType.size_t;
       EOS
     end
 
@@ -43,19 +85,7 @@ module FFIDB::Exporters
     # @param  [String] c_type
     # @return [Symbol]
     def jna_type(c_type)
-      # See: https://github.com/java-native-access/jna/blob/master/www/Mappings.md
-      case c_type
-        when 'void' then :void
-        when '_Bool' then :boolean
-        when 'float', 'double' then c_type.to_sym
-        when 'char', 'unsigned char' then :byte
-        when 'short', 'unsigned short' then :short
-        when 'int', 'unsigned int' then :int
-        when 'long', 'unsigned long' then :NativeLong
-        when 'long long', 'unsigned long long' then :long
-        when 'char *', 'const char *' then :String
-        else :Pointer # DEBUG: "<<<<#{c_type}>>>>"
-      end
+      TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
     end
   end # Java
 end # FFIDB::Exporters
