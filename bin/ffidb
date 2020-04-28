@@ -105,7 +105,9 @@ class CLI < Thor
     base_directory = paths.first.dirname if base_directory.nil?
 
     begin
+      $VERBOSE = nil # suppress deprecation warnings from ffi-clang
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
+      $VERBOSE = false
     rescue LoadError => error
       raise error if self.options[:debug]
       abort error.to_s
