@@ -44,7 +44,7 @@ class CLI < Thor
       end
     end
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
@@ -56,7 +56,7 @@ class CLI < Thor
     exit $?.exitstatus if $?.exitstatus.nonzero?
     Dir.chdir registry_path
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
@@ -75,7 +75,7 @@ class CLI < Thor
       end
     end
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
@@ -99,7 +99,7 @@ class CLI < Thor
     begin
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
     rescue LoadError => error
-      p error if self.options[:debug]
+      raise error if self.options[:debug]
       abort error.to_s
     end
 
@@ -111,29 +111,19 @@ class CLI < Thor
         parser.define! var, val
       end
 
-      paths.each_with_index do |path, counter|
+      counter = 0
+      paths.each do |path|
         header = parser.parse_header(path)
         header.functions.sort.each do |function|
           puts unless counter.zero?
-          p function if self.options[:debug]
           counter += 1
-          puts "--- !function"
-          yaml = {
-            'name' => function.name,
-            'result' => function.return_type,
-          }
-          yaml['parameters'] = function.parameters.inject({}) { |h, p| h.merge!(p.to_h) } if function.arity > 0
-          yaml['definition'] = {
-            'file' => function.definition&.file,
-            'line' => function.definition&.line,
-          }
-          yaml['comment'] = function.comment if function.comment && !function.comment.empty?
-          puts YAML.dump(yaml).gsub("---\n", '')
+          p function if self.options[:debug]
+          puts function.to_yaml
         end
       end
     end
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
@@ -148,7 +138,7 @@ class CLI < Thor
     end
   rescue => error
     abort "#{$0}: #{error}"
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
   end
 
   desc "show SYMBOL", "Show function information"
@@ -163,7 +153,7 @@ class CLI < Thor
       raise "Function not found: #{function}" unless found
     end
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
@@ -175,7 +165,7 @@ class CLI < Thor
     system %Q(git pull) # TODO: improve this
     exit $?.exitstatus if $?.exitstatus.nonzero?
   rescue => error
-    p error if self.options[:debug]
+    raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 end # CLI

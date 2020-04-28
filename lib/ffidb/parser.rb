@@ -48,7 +48,8 @@ module FFIDB
                 case declaration.kind
                    when :cursor_parm_decl
                      default_name = "_#{function.parameters.size + 1}"
-                     function.parameters << self.parse_parameter(declaration, default_name: default_name)
+                     parameter = self.parse_parameter(declaration, default_name: default_name)
+                     function.parameters[parameter.name.to_sym] = parameter
                    else break
                 end
               end
@@ -64,12 +65,13 @@ module FFIDB
     # @param  [FFI::Clang::Cursor] declaration
     # @return [Function]
     def parse_function(declaration)
+      comment = declaration.comment&.text
       FFIDB::Function.new(
         name: declaration.spelling,
-        type: declaration.type.canonical.spelling, # FIXME
-        parameters: [],
+        type: self.parse_type(declaration.type.result_type),
+        parameters: {},
         definition: self.parse_location(declaration.location),
-        comment: declaration.comment&.text,
+        comment: comment && !(comment.empty?) ? comment : nil,
       )
     end
 
@@ -81,7 +83,7 @@ module FFIDB
       name = declaration.spelling
       type = self.parse_type(declaration.type)
       FFIDB::Parameter.new(
-        name: (name.nil? || name.empty?) ? default_name.to_s : name,
+        name: ((name.nil? || name.empty?) ? default_name.to_s : name).to_sym,
         type: type,
       )
     end

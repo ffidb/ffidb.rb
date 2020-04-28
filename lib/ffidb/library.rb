@@ -57,7 +57,7 @@ module FFIDB
                 end
                 yield Function.new(
                   name: yaml[:name],
-                  type: yaml[:result], # FIXME
+                  type: yaml[:type],
                   parameters: parameters,
                   definition: !yaml.has_key?(:definition) ? nil : Location.new(
                     file: yaml.dig(:definition, 'file'),

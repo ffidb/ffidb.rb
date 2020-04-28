@@ -9,6 +9,9 @@ module FFIDB
   class Function < Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
     include Comparable
 
+    alias_method :result_type, :type
+    alias_method :return_type, :type
+
     ##
     # @param  [Function] other
     # @return [Integer]
@@ -43,13 +46,6 @@ module FFIDB
     def arity() self.parameters.size end
 
     ##
-    # @return [String]
-    def result_type
-      self.type.split('(', 2).first.strip
-    end
-    alias_method :return_type, :result_type
-
-    ##
     # @return [Hash<Symbol, Object>]
     def to_h
       {
@@ -58,15 +54,17 @@ module FFIDB
         parameters: self.parameters&.transform_values { |v| v.type },
         definition: self.definition&.to_h,
         comment: self.comment,
-      }
+      }.delete_if { |k, v| v.nil? }
     end
 
     ##
     # @return [String]
     def to_yaml
-      YAML.dump(self.to_h.transform_keys!(&:to_s).transform_values do |v|
-        v.is_a?(Hash) ? v.transform_keys!(&:to_s) : v
-      end).gsub!("---\n", "--- !function\n")
+      h = self.to_h
+      h.delete(:parameters) if h[:parameters].empty?
+      h.transform_keys!(&:to_s)
+      h.transform_values! { |v| v.is_a?(Hash) ? v.transform_keys!(&:to_s) : v }
+      YAML.dump(h).gsub!("---\n", "--- !function\n")
     end
   end # Function
 end # FFIDB
