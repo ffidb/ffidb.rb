@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -W0
+#!/usr/bin/env ruby -W1
 # This is free and unencumbered software released into the public domain.
 
 require_relative '../lib/ffidb'
@@ -51,19 +51,27 @@ class CLI < Thor
   desc "init", "Initialize the registry (at: ~/.ffidb)"
   def init
     registry_path = FFIDB::Registry.default_path
-    return if registry_path.exist?
-    system %Q(git clone #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path}) # TODO: improve this
-    exit $?.exitstatus if $?.exitstatus.nonzero?
+    if registry_path.exist?
+      warn "#{$0}: The registry at #{registry_path} has already been initialized." if self.options[:verbose]
+      return
+    end
+    git_command = %Q(git clone #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path})
+    system git_command # TODO: improve this
+    if $?.exitstatus.nonzero?
+      warn "#{$0}: Failed to execute `#{git_command}`: exit code #{$?.exitstatus}."
+      exit $?.exitstatus
+    end
     Dir.chdir registry_path
   rescue => error
     raise error if self.options[:debug]
     abort "#{$0}: #{error}"
   end
 
-  desc "list", "List libraries and functions"
-  def list
+  desc "list [LIBRARY]", "List libraries and functions"
+  def list(library_name = nil)
     FFIDB::Registry.open do |registry|
       registry.each_library do |library|
+        next if library_name && library_name != library.name
         p library if self.options[:debug]
         library.each_function do |function|
           p function if self.options[:debug]
@@ -162,8 +170,12 @@ class CLI < Thor
     registry_path = FFIDB::Registry.default_path
     raise "Registry at #{registry_path} not initialized (run `#{$0} init` first?)" unless registry_path.exist?
     Dir.chdir registry_path
-    system %Q(git pull) # TODO: improve this
-    exit $?.exitstatus if $?.exitstatus.nonzero?
+    git_command = %Q(git pull)
+    system git_command # TODO: improve this
+    if $?.exitstatus.nonzero?
+      warn "#{$0}: Failed to execute `#{git_command}` in #{registry_path}: exit code #{$?.exitstatus}."
+      exit $?.exitstatus
+    end
   rescue => error
     raise error if self.options[:debug]
     abort "#{$0}: #{error}"
