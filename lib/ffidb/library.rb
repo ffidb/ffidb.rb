@@ -6,6 +6,8 @@ require 'yaml'
 
 module FFIDB
   class Library
+    include Comparable
+
     attr_reader :name
     attr_reader :version
     attr_reader :path
@@ -16,6 +18,11 @@ module FFIDB
     attr_reader :dlopen
     attr_reader :objects
     attr_reader :headers
+
+    ##
+    # @param  [Library] other
+    # @return [Integer]
+    def <=>(other) self.name <=> other&.name end # FIXME
 
     ##
     # @param [String, #to_s] name

@@ -16,7 +16,8 @@ class CLI < Thor
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  def export(*keywords)
+  def export(keyword, *keywords)
+    keywords.prepend(keyword)
     format = (self.options[:format] || 'c').to_sym
     FFIDB::Registry.open do |registry|
       FFIDB::Exporter.for(format).new(**options).emit do |export|
@@ -89,8 +90,9 @@ class CLI < Thor
 
   desc "parse HEADER...", "Parse .h header files"
   option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
-  def parse(*paths)
+  def parse(path, *paths)
     base_directory = nil
+    paths.prepend(path)
     paths = paths.inject([]) do |paths, path|
       path = Pathname(path)
       case
