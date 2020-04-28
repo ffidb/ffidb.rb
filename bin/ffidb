@@ -115,7 +115,7 @@ class CLI < Thor
       abort error.to_s
     end
 
-    FFIDB::Parser.new(base_directory: base_directory).tap do |parser|
+    FFIDB::Parser.new(base_directory: base_directory, debug: self.options[:verbose] || self.options[:debug]).tap do |parser|
       # Parse and define any given preprocessor symbols:
       (self.options[:define] || []).each do |var_and_val|
         var, val = var_and_val.split('=', 2)
@@ -130,6 +130,7 @@ class CLI < Thor
           puts unless counter.zero?
           counter += 1
           p function if self.options[:debug]
+          puts '# ' + function.instance_variable_get(:@debug) if parser.debug
           puts function.to_yaml
         end
       end

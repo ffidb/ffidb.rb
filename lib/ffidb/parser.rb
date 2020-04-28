@@ -5,14 +5,16 @@ require 'pathname'
 module FFIDB
   class Parser
     attr_reader :base_directory
+    attr_reader :debug
     attr_reader :defines
 
     ##
     # @param [Pathname, #to_s] base_directory
-    def initialize(base_directory: nil)
+    def initialize(base_directory: nil, debug: nil)
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
 
       @base_directory = base_directory
+      @debug = debug
       @defines = {}
       @clang_index = FFI::Clang::Index.new
     end
@@ -65,14 +67,17 @@ module FFIDB
     # @param  [FFI::Clang::Cursor] declaration
     # @return [Function]
     def parse_function(declaration)
+      name = declaration.spelling
       comment = declaration.comment&.text
-      FFIDB::Function.new(
-        name: declaration.spelling,
+      function = FFIDB::Function.new(
+        name: name,
         type: self.parse_type(declaration.type.result_type),
         parameters: {},
         definition: self.parse_location(declaration.location),
         comment: comment && !(comment.empty?) ? comment : nil,
       )
+      function.instance_variable_set(:@debug, declaration.type.spelling.sub(/\s*\(/, " #{name}(")) if self.debug
+      function
     end
 
     ##
