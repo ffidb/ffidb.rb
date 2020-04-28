@@ -13,6 +13,7 @@ module FFIDB
         when :python, :py then Exporters::Python
         when :ruby, :rb then Exporters::Ruby
         # TODO: go, ocaml, php, racket, zig
+        when :yaml then Exporters::YAML
         else raise "unknown output format: #{format}"
       end
     end
