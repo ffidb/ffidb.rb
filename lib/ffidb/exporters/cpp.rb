@@ -8,6 +8,10 @@ module FFIDB::Exporters
   class Cpp < FFIDB::Exporter
     def begin
       puts "// #{FFIDB.header}"
+      puts
+      puts "#include <cstdbool>"
+      puts "#include <cstddef>"
+      puts "#include <cstdint>"
     end
 
     def begin_library(library)
@@ -21,7 +25,13 @@ module FFIDB::Exporters
     end
 
     def export_function(function)
-      parameters = function.parameters.each_value.map { |p| "#{p.type} #{p.name}" }
+      parameters = function.parameters.each_value.map do |p|
+        if p.type.include?('(*)') # function pointer
+          p.type.sub('(*)', "(*#{p.name})")
+        else
+          "#{p.type} #{p.name}"
+        end
+      end
       puts "  extern \"C\" #{function.type} #{function.name}(#{parameters.join(', ')});"
     end
   end # Cpp
