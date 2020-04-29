@@ -29,17 +29,24 @@ module FFIDB
 
     ##
     # @param  [Pathname, #to_s] path
-    # @return [void]
+    # @yield  [exception]
+    # @return [Header]
     def parse_header(path)
       path = Pathname(path.to_s) unless path.is_a?(Pathname)
       name = (self.base_directory ? path.relative_path_from(self.base_directory) : path).to_s
       args = self.defines.inject([]) { |r, (k, v)| r << "-D#{k}=#{v}" }
 
       translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
-      root_cursor = translation_unit.cursor
-      comment = root_cursor.comment&.text
+      translation_unit.diagnostics.each do |diagnostic|
+        exception = case diagnostic.severity.to_sym
+          when :fatal then ParseError.new(diagnostic.format)
+          else ParseWarning.new(diagnostic.format)
+        end
+        yield exception
+      end
 
-      FFIDB::Header.new(name: name, comment: comment, functions: []).tap do |header|
+      FFIDB::Header.new(name: name, functions: []).tap do |header|
+        root_cursor = translation_unit.cursor
         root_cursor.visit_children do |declaration, _|
           case declaration.kind
             when :cursor_function
@@ -58,6 +65,7 @@ module FFIDB
           end
           :continue # visit the next sibling
         end
+        header.comment = root_cursor.comment&.text
       end
     end
 

@@ -125,7 +125,10 @@ class CLI < Thor
 
       counter = 0
       paths.each do |path|
-        header = parser.parse_header(path)
+        header = parser.parse_header(path) do |exception|
+          raise exception if exception.is_a?(FFIDB::ParseError)
+          warn "#{$0}: #{exception}"
+        end
         header.functions.sort.each do |function|
           puts unless counter.zero?
           counter += 1
