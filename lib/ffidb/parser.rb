@@ -98,9 +98,10 @@ module FFIDB
       ostensible_type = type.spelling
       canonical_type = case ostensible_type
         when '_Bool'  then ostensible_type                          # <stdbool.h>
-        when 'size_t' then ostensible_type                          # <stddef.h>
+        when 'size_t', 'wchar_t' then ostensible_type               # <stddef.h>
         when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then ostensible_type # <stdint.h>
         when /^u?intptr_t$/ then ostensible_type                    # <stdint.h>
+        when 'ssize_t', 'off_t', 'off64_t' then ostensible_type     # <sys/types.h>
         else type.canonical.spelling
       end
     end
