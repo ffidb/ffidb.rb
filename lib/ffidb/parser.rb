@@ -22,10 +22,19 @@ module FFIDB
     end
 
     ##
+    # @param  [String, #to_s] var_and_val
+    # @return [void]
+    def parse_macro!(var_and_val)
+      var, val = var_and_val.to_s.split('=', 2)
+      val = 1 if val.nil?
+      self.define_macro! var, val
+    end
+
+    ##
     # @param  [Symbol, #to_sym] var
     # @param  [String, #to_s] val
     # @return [void]
-    def define!(var, val = 1)
+    def define_macro!(var, val = 1)
       self.defines[var.to_sym] = val.to_s
     end
 
@@ -50,6 +59,7 @@ module FFIDB
       translation_unit.diagnostics.each do |diagnostic|
         exception = case diagnostic.severity.to_sym
           when :fatal then ParseError.new(diagnostic.format)
+          when :warning then ParseWarning.new(diagnostic.format)
           else ParseWarning.new(diagnostic.format)
         end
         yield exception

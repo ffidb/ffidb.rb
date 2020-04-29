@@ -89,6 +89,7 @@ class CLI < Thor
   end
 
   desc "parse HEADER...", "Parse .h header files"
+  option :config, aliases: '-C', banner: 'FILE', desc: "Use a library.yaml configuration file"
   option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
   option :include, aliases: '-I', repeatable: true, banner: 'DIRECTORY', desc: "Add a directory to the headers search path"
   def parse(path, *paths)
@@ -117,12 +118,22 @@ class CLI < Thor
     end
 
     FFIDB::Parser.new(base_directory: base_directory, debug: self.options[:verbose] || self.options[:debug]).tap do |parser|
-      # Parse and define any given preprocessor symbols:
-      (self.options[:define] || []).each do |var_and_val|
-        var, val = var_and_val.split('=', 2)
-        val = 1 if val.nil?
-        parser.define! var, val
+      # Parse a library.yaml configuration file, if given:
+      if config_path = self.options[:config]
+        config_path = Pathname(config_path)
+        raise Errno::ENOENT, config_path.to_s unless config_path.exist?
+        yaml = YAML.load(config_path.read).transform_keys(&:to_sym)
+        (yaml[:configure] || []).each do |var_and_val|
+          parser.parse_macro! var_and_val
+        end
       end
+
+      # Parse and define all specified -D preprocessor symbols:
+      (self.options[:define] || []).each do |var_and_val|
+        parser.parse_macro! var_and_val
+      end
+
+      # Add all specified -I directories to the headers search path:
       (self.options[:include] || []).each do |dir_path|
         parser.add_include_path! Pathname(dir_path).expand_path
       end
