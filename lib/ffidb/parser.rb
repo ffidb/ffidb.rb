@@ -46,14 +46,11 @@ module FFIDB
           case declaration.kind
             when :cursor_function
               function = self.parse_function(declaration)
-              while declaration = declarations.shift
-                case declaration.kind
-                   when :cursor_parm_decl
-                     default_name = "_#{function.parameters.size + 1}"
-                     parameter = self.parse_parameter(declaration, default_name: default_name)
-                     function.parameters[parameter.name.to_sym] = parameter
-                   else break
-                end
+              declaration.visit_children do |child, parent|
+                default_name = "_#{function.parameters.size + 1}"
+                parameter = self.parse_parameter(child, default_name: default_name)
+                function.parameters[parameter.name.to_sym] = parameter
+                :continue # visit the next sibling
               end
               function.parameters.freeze
               header.functions << function
