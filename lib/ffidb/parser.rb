@@ -55,22 +55,18 @@ module FFIDB
         yield exception
       end
 
+      base_directory_str = base_directory.to_s.freeze
       FFIDB::Header.new(name: name, functions: []).tap do |header|
         root_cursor = translation_unit.cursor
         root_cursor.visit_children do |declaration, _|
+          location = declaration.location
           case declaration.kind
             when :cursor_function
-              function = self.parse_function(declaration)
-              declaration.visit_children do |child_declaration, _|
-                if child_declaration.kind == :cursor_parm_decl
-                  default_name = "_#{function.parameters.size + 1}"
-                  parameter = self.parse_parameter(child_declaration, default_name: default_name)
-                  function.parameters[parameter.name.to_sym] = parameter
-                end
-                :continue # visit the next sibling
+              if location.file.start_with?(base_directory_str)
+                function = self.parse_function(declaration)
+                function.definition = self.parse_location(location)
+                header.functions << function
               end
-              function.parameters.freeze
-              header.functions << function
             else # TODO: other declarations of interest?
           end
           :continue # visit the next sibling
@@ -89,9 +85,18 @@ module FFIDB
         name: name,
         type: self.parse_type(declaration.type.result_type),
         parameters: {},
-        definition: self.parse_location(declaration.location),
+        definition: nil, # set in #parse_header()
         comment: comment && !(comment.empty?) ? comment : nil,
       )
+      declaration.visit_children do |child_declaration, _|
+        if child_declaration.kind == :cursor_parm_decl
+          default_name = "_#{function.parameters.size + 1}"
+          parameter = self.parse_parameter(child_declaration, default_name: default_name)
+          function.parameters[parameter.name.to_sym] = parameter
+        end
+        :continue # visit the next sibling
+      end
+      function.parameters.freeze
       function.instance_variable_set(:@debug, declaration.type.spelling.sub(/\s*\(/, " #{name}(")) if self.debug
       function
     end
