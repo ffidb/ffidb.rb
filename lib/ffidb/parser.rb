@@ -8,6 +8,7 @@ module FFIDB
     attr_reader :debug
     attr_reader :defines
     attr_reader :include_paths
+    attr_reader :exclude_symbols
 
     ##
     # @param [Pathname, #to_s] base_directory
@@ -18,6 +19,7 @@ module FFIDB
       @debug = debug
       @defines = {}
       @include_paths = []
+      @exclude_symbols = []
       @clang_index = FFI::Clang::Index.new
     end
 
@@ -43,6 +45,13 @@ module FFIDB
     # @return [void]
     def add_include_path!(path)
       self.include_paths << Pathname(path)
+    end
+
+    ##
+    # @param  [Symbol, #to_s] symbol_name
+    # @return [void]
+    def exclude_symbol!(symbol)
+      self.exclude_symbols << symbol.to_s
     end
 
     ##
@@ -72,7 +81,8 @@ module FFIDB
           location = declaration.location
           case declaration.kind
             when :cursor_function
-              if location.file.start_with?(base_directory_str)
+              function_name = declaration.spelling
+              if location.file.start_with?(base_directory_str) && !self.exclude_symbols.include?(function_name)
                 function = self.parse_function(declaration)
                 function.definition = self.parse_location(location)
                 header.functions << function

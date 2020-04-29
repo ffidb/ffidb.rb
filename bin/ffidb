@@ -122,9 +122,12 @@ class CLI < Thor
       if config_path = self.options[:config]
         config_path = Pathname(config_path)
         raise Errno::ENOENT, config_path.to_s unless config_path.exist?
-        yaml = YAML.load(config_path.read).transform_keys(&:to_sym)
-        (yaml[:configure] || []).each do |var_and_val|
+        config = YAML.load(config_path.read).transform_keys(&:to_sym)
+        (config[:configure] || []).each do |var_and_val|
           parser.parse_macro! var_and_val
+        end
+        (config[:exclude] || []).each do |symbol|
+          parser.exclude_symbol! symbol
         end
       end
 
