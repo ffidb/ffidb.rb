@@ -90,6 +90,7 @@ class CLI < Thor
 
   desc "parse HEADER...", "Parse .h header files"
   option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
+  option :include, aliases: '-I', repeatable: true, banner: 'DIRECTORY', desc: "Add a directory to the headers search path"
   def parse(path, *paths)
     base_directory = nil
     paths.prepend(path)
@@ -121,6 +122,9 @@ class CLI < Thor
         var, val = var_and_val.split('=', 2)
         val = 1 if val.nil?
         parser.define! var, val
+      end
+      (self.options[:include] || []).each do |dir_path|
+        parser.add_include_path! Pathname(dir_path).expand_path
       end
 
       counter = 0

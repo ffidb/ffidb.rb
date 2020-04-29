@@ -7,6 +7,7 @@ module FFIDB
     attr_reader :base_directory
     attr_reader :debug
     attr_reader :defines
+    attr_reader :include_paths
 
     ##
     # @param [Pathname, #to_s] base_directory
@@ -16,6 +17,7 @@ module FFIDB
       @base_directory = base_directory
       @debug = debug
       @defines = {}
+      @include_paths = []
       @clang_index = FFI::Clang::Index.new
     end
 
@@ -29,12 +31,20 @@ module FFIDB
 
     ##
     # @param  [Pathname, #to_s] path
+    # @return [void]
+    def add_include_path!(path)
+      self.include_paths << Pathname(path)
+    end
+
+    ##
+    # @param  [Pathname, #to_s] path
     # @yield  [exception]
     # @return [Header]
     def parse_header(path)
       path = Pathname(path.to_s) unless path.is_a?(Pathname)
       name = (self.base_directory ? path.relative_path_from(self.base_directory) : path).to_s
       args = self.defines.inject([]) { |r, (k, v)| r << "-D#{k}=#{v}" }
+      args += self.include_paths.map { |p| "-I#{p}" }
 
       translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
       translation_unit.diagnostics.each do |diagnostic|
