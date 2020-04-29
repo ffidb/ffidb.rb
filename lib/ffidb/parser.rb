@@ -36,26 +36,27 @@ module FFIDB
       args = self.defines.inject([]) { |r, (k, v)| r << "-D#{k}=#{v}" }
 
       translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
-      declarations = translation_unit.cursor.select(&:declaration?)
-      comment = translation_unit.cursor.comment&.text
+      root_cursor = translation_unit.cursor
+      comment = root_cursor.comment&.text
 
       FFIDB::Header.new(name: name, comment: comment, functions: []).tap do |header|
-        while declaration = declarations.shift
-          location = declaration.location
-          comment = declaration.comment
+        root_cursor.visit_children do |declaration, _|
           case declaration.kind
             when :cursor_function
               function = self.parse_function(declaration)
-              declaration.visit_children do |child, parent|
-                default_name = "_#{function.parameters.size + 1}"
-                parameter = self.parse_parameter(child, default_name: default_name)
-                function.parameters[parameter.name.to_sym] = parameter
+              declaration.visit_children do |child_declaration, _|
+                if child_declaration.kind == :cursor_parm_decl
+                  default_name = "_#{function.parameters.size + 1}"
+                  parameter = self.parse_parameter(child_declaration, default_name: default_name)
+                  function.parameters[parameter.name.to_sym] = parameter
+                end
                 :continue # visit the next sibling
               end
               function.parameters.freeze
               header.functions << function
             else # TODO: other declarations of interest?
           end
+          :continue # visit the next sibling
         end
       end
     end
