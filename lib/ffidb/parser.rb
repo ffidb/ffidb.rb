@@ -145,7 +145,7 @@ module FFIDB
           $1
         else nil
       end
-      if self.preserve_type(ostensible_type)
+      if self.preserve_type?(ostensible_type)
         ostensible_type << pointer_suffix if pointer_suffix
         ostensible_type
       else
@@ -156,8 +156,9 @@ module FFIDB
     ##
     # @param  [String, #to_s] type_name
     # @return [Boolean]
-    def preserve_type(type_name)
+    def preserve_type?(type_name)
       case type_name.to_s
+        when 'va_list' then true                          # <stdarg.h>
         when '_Bool'  then true                           # <stdbool.h>
         when 'size_t', 'wchar_t' then true                # <stddef.h>
         when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then true  # <stdint.h>
