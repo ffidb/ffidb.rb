@@ -64,16 +64,16 @@ module FFIDB
     end
 
     ##
-    # @param  [String, Regexp] keyword
+    # @param  [Glob, #===] matcher
     # @yield  [function]
     # @yield  [library]
     # @return [Enumerator]
-    def find_functions(keyword, &block)
+    def find_functions(matcher, &block)
       return self.to_enum(:find_functions) unless block_given?
       count = 0
       self.each_library do |library|
         library.each_function do |function|
-          if keyword === function.name
+          if matcher === function.name
             count += 1
             yield function, library
           end

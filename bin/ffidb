@@ -16,26 +16,29 @@ class CLI < Thor
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  option :exclude, repeatable: true, banner: 'SYMBOL', desc: "Exclude symbols"
+  option :exclude, repeatable: true, banner: 'PATTERN', desc: "Exclude symbols matching a glob pattern"
   def export(keyword, *keywords)
     keywords.prepend(keyword)
     format = (self.options[:format] || 'c').to_sym
-    excludes = self.options[:exclude] || []
+    excludes = (self.options[:exclude] || []).map do |exclude_pattern|
+      FFIDB::Glob.new(exclude_pattern, ignore_case: false, match_substring: false)
+    end
     FFIDB::Registry.open do |registry|
-      FFIDB::Exporter.for(format).new(**options).emit do |export|
-        exports = []
-        keywords.each do |keyword|
-          if library = registry.open_library(keyword)
-            library.each_function do |function|
-              exports << [library, function] unless excludes.include?(function.name)
-            end
-          else
-            keyword = Regexp.new('^' + Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.') + '$', Regexp::IGNORECASE)
-            registry.find_functions(keyword) do |function, library|
-              exports << [library, function] unless excludes.include?(function.name)
-            end
+      exports = []
+      keywords.each do |keyword|
+        if library = registry.open_library(keyword)
+          library.each_function do |function|
+            exports << [library, function] unless excludes.any? { |x| x === function.name }
+          end
+        else
+          matcher = FFIDB::Glob.new(keyword, ignore_case: true, match_substring: false)
+          registry.find_functions(matcher) do |function, library|
+            exports << [library, function] unless excludes.any? { |x| x === function.name }
           end
         end
+      end
+
+      FFIDB::Exporter.for(format).new(**options).emit do |export|
         prev_library = nil
         exports.sort!.uniq.each do |library, function|
           if library != prev_library
@@ -167,10 +170,10 @@ class CLI < Thor
 
   desc "search KEYWORD", "Search for functions using a glob keyword"
   def search(keyword)
-    keyword = Regexp.new(Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.'), Regexp::IGNORECASE)
-    p self.options, keyword if self.options[:debug]
+    matcher = FFIDB::Glob.new(keyword, ignore_case: true, match_substring: true)
+    p self.options, matcher if self.options[:debug]
     FFIDB::Registry.open do |registry|
-      registry.find_functions(keyword) do |function, library|
+      registry.find_functions(matcher) do |function, library|
         puts "#{library.name}\t#{function.name}" # TODO: improve formatting
       end
     end
