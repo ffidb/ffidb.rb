@@ -25,7 +25,7 @@ module FFIDB::Exporters
 
     def export_function(function)
       parameters = function.parameters.each_value.map do |p|
-        p.type = p.type.gsub('const char *const[]', 'const char * const *')
+        p.type = p.type.gsub('const char *const[]', 'const char * const *') # FIXME
         if p.type.include?('(*)') # function pointer
           p.type.sub('(*)', "(*#{p.name})")
         else

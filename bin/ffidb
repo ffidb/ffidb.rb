@@ -16,19 +16,23 @@ class CLI < Thor
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output format"
+  option :exclude, repeatable: true, banner: 'SYMBOL', desc: "Exclude symbols"
   def export(keyword, *keywords)
     keywords.prepend(keyword)
     format = (self.options[:format] || 'c').to_sym
+    excludes = self.options[:exclude] || []
     FFIDB::Registry.open do |registry|
       FFIDB::Exporter.for(format).new(**options).emit do |export|
         exports = []
         keywords.each do |keyword|
           if library = registry.open_library(keyword)
-            library.each_function { |function| exports << [library, function] }
+            library.each_function do |function|
+              exports << [library, function] unless excludes.include?(function.name)
+            end
           else
             keyword = Regexp.new('^' + Regexp.escape(keyword).gsub('\*', '.*').gsub('\?', '.') + '$', Regexp::IGNORECASE)
             registry.find_functions(keyword) do |function, library|
-              exports << [library, function]
+              exports << [library, function] unless excludes.include?(function.name)
             end
           end
         end
