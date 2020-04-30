@@ -47,6 +47,26 @@ module FFIDB
     def soname() self.objects&.first end
 
     ##
+    # @return [Array<String>]
+    def types
+      self.each_type.to_a
+    end
+
+    ##
+    # @yield  [type_name]
+    # @return [Enumerator]
+    def each_type(&block)
+      return self.to_enum(:each_type) unless block_given?
+      types = {}
+      self.each_function do |function|
+        function.parameters.each_value do |parameter|
+          types[parameter.type] ||= true
+        end
+      end
+      types.keys.sort.each(&block)
+    end
+
+    ##
     # @yield  [function]
     # @return [Enumerator]
     def each_function(&block)
