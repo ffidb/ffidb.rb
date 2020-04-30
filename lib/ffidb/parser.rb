@@ -139,13 +139,31 @@ module FFIDB
     # @return [String]
     def parse_type(type)
       ostensible_type = type.spelling
-      canonical_type = case ostensible_type
-        when '_Bool'  then ostensible_type                          # <stdbool.h>
-        when 'size_t', 'wchar_t' then ostensible_type               # <stddef.h>
-        when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then ostensible_type # <stdint.h>
-        when /^u?intptr_t$/ then ostensible_type                    # <stdint.h>
-        when 'ssize_t', 'off_t', 'off64_t' then ostensible_type     # <sys/types.h>
-        else type.canonical.spelling
+      pointer_suffix = case ostensible_type
+        when /(\s\*+)$/
+          ostensible_type.delete_suffix!($1)
+          $1
+        else nil
+      end
+      if self.preserve_type(ostensible_type)
+        ostensible_type << pointer_suffix if pointer_suffix
+        ostensible_type
+      else
+        type.canonical.spelling
+      end
+    end
+
+    ##
+    # @param  [String, #to_s] type_name
+    # @return [Boolean]
+    def preserve_type(type_name)
+      case type_name.to_s
+        when '_Bool'  then true                           # <stdbool.h>
+        when 'size_t', 'wchar_t' then true                # <stddef.h>
+        when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then true  # <stdint.h>
+        when /^u?intptr_t$/ then true                     # <stdint.h>
+        when 'ssize_t', 'off_t', 'off64_t' then true      # <sys/types.h>
+        else false
       end
     end
 
