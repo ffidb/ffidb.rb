@@ -1,17 +1,21 @@
 # This is free and unencumbered software released into the public domain.
 
-require_relative '../exporter'
+require_relative 'c'
 
 module FFIDB::Exporters
   ##
   # Code generator for the C++ programming language.
-  class Cpp < FFIDB::Exporter
+  class Cpp < C
+    EXTERN_QUALIFIER = 'extern "C"'
+
     def begin
       puts "// #{FFIDB.header}"
       puts
-      puts "#include <cstdbool>"
-      puts "#include <cstddef>"
-      puts "#include <cstdint>"
+      puts "#include <cstdarg>     // for va_list"
+      puts "#include <cstdbool>    // for bool" # not needed in C++
+      puts "#include <cstddef>     // for size_t"
+      puts "#include <cstdint>     // for {,u}int*_t"
+      puts "#include <sys/types.h> // for off_t"
     end
 
     def begin_library(library)
@@ -22,17 +26,6 @@ module FFIDB::Exporters
 
     def finish_library
       puts "} // #{@library.name}"
-    end
-
-    def export_function(function)
-      parameters = function.parameters.each_value.map do |p|
-        if p.type.include?('(*)') # function pointer
-          p.type.sub('(*)', "(*#{p.name})")
-        else
-          "#{p.type} #{p.name}"
-        end
-      end
-      puts "  extern \"C\" #{function.type} #{function.name}(#{parameters.join(', ')});"
     end
   end # Cpp
 end # FFIDB::Exporters
