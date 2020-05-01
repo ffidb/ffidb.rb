@@ -74,7 +74,7 @@ class CLI < Thor
       warn "#{$0}: The registry at #{registry_path} has already been initialized." if self.options[:verbose]
       return
     end
-    git_command = %Q(git clone #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path})
+    git_command = %Q(git clone --depth=1 #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path})
     system git_command # TODO: improve this
     if $?.exitstatus.nonzero?
       warn "#{$0}: Failed to execute `#{git_command}`: exit code #{$?.exitstatus}."
