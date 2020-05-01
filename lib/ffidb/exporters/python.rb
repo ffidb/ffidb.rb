@@ -31,7 +31,7 @@ module FFIDB::Exporters
       'char *'             => :char_p,
       'const char *'       => :char_p,
       # <stdarg.h>
-      'va_list'.           => :void_p,
+      'va_list'            => :void_p,
       # <stdbool.h>
       '_Bool'              => :bool,
       # <stddef.h>

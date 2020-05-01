@@ -12,7 +12,7 @@ module FFIDB
         when :lisp, :'common-lisp' then Exporters::Lisp
         when :python, :py then Exporters::Python
         when :ruby, :rb then Exporters::Ruby
-        # TODO: go, ocaml, php, racket, zig
+        # TODO: csharp, go, haskell, julia, luajit, nim, nodejs, ocaml, php, racket, rust, zig
         when :yaml then Exporters::YAML
         else raise "unknown output format: #{format}"
       end

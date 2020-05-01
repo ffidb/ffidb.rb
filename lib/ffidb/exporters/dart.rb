@@ -33,7 +33,7 @@ module FFIDB::Exporters
       'char *'             => 'Pointer<ffi.Int8>', # TODO: Utf8
       'const char *'       => 'Pointer<ffi.Int8>', # TODO: Utf8
       # <stdarg.h>
-      'va_list'.           => 'Pointer<ffi.Void>',
+      'va_list'            => 'Pointer<ffi.Void>',
       # <stdbool.h>
       '_Bool'              => :Int8,   # TODO
       # <stddef.h>
