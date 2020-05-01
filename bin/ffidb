@@ -15,14 +15,23 @@ class CLI < Thor
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
-  option :format, aliases: '-f', default: nil, desc: "Specify the output format"
-  option :exclude, repeatable: true, banner: 'PATTERN', desc: "Exclude symbols matching a glob pattern"
+  option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT"
+  option :exclude, repeatable: true, banner: 'PATTERN', desc: "Exclude symbols matching the glob PATTERN"
+  option :exclude_from, repeatable: true, banner: 'FILE', desc: "Read exclude patterns from FILE"
   def export(keyword, *keywords)
     keywords.prepend(keyword)
     format = (self.options[:format] || 'c').to_sym
-    excludes = (self.options[:exclude] || []).map do |exclude_pattern|
+    excludes = (self.options[:exclude] || [])
+    (self.options[:exclude_from] || []).map do |exclude_path|
+      exclude_path = Pathname(exclude_path)
+      raise Errno::ENOENT, exclude_path.to_s unless exclude_path.exist?
+      exclude_path.each_line { |line| excludes << line.chomp }
+    end
+    excludes.sort!.uniq!
+    excludes.map! do |exclude_pattern|
       FFIDB::Glob.new(exclude_pattern, ignore_case: false, match_substring: false)
     end
+
     FFIDB::Registry.open do |registry|
       exports = []
       keywords.each do |keyword|
