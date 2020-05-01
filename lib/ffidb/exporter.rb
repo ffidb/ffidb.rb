@@ -5,8 +5,8 @@ module FFIDB
     def self.for(format) # TODO
       require_relative 'exporters'
       case format&.to_sym
-        when :c then Exporters::C
-        when :cpp, :cxx, :'c++' then Exporters::Cpp
+        when :c, :c99, :c11, :c18 then Exporters::C
+        when :'c++', :'c++11', :'c++14', :'c++17', :'c++20', :cpp, :cxx then Exporters::Cpp
         when :dart, :flutter then Exporters::Dart
         when :java, :jna then Exporters::Java
         when :lisp, :'common-lisp' then Exporters::Lisp

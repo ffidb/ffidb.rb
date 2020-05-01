@@ -6,6 +6,7 @@ module FFIDB::Exporters
   ##
   # Code generator for the C++ programming language.
   class Cpp < C
+    SYMBOL_INDENT    = 2
     EXTERN_QUALIFIER = 'extern "C"'
 
     def begin

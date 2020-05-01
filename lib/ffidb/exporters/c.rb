@@ -6,6 +6,7 @@ module FFIDB::Exporters
   ##
   # Code generator for the C programming language.
   class C < FFIDB::Exporter
+    SYMBOL_INDENT    = 0
     EXTERN_QUALIFIER = 'extern'
 
     def begin
@@ -20,7 +21,7 @@ module FFIDB::Exporters
 
     def begin_library(library)
       puts
-      puts "// #{library.name}"
+      puts "// #{library.name} API"
     end
 
     def export_function(function)
@@ -32,6 +33,8 @@ module FFIDB::Exporters
           "#{p.type} #{p.name}"
         end
       end
+      indent = self.class.const_get(:SYMBOL_INDENT)
+      print ' ' * indent if indent && indent.nonzero?
       print self.class.const_get(:EXTERN_QUALIFIER), ' '
       if function.type.include?('(*)')
         print function.type.sub('(*)', "(*#{function.name}(#{parameters.join(', ')}))")

@@ -8,21 +8,59 @@ require 'thor' # https://rubygems.org/gems/thor
 require 'pathname'
 require 'yaml'
 
+EX_USAGE       = 64
+EX_DATAERR     = 65
+EX_NOINPUT     = 66
+EX_NOUSER      = 67
+EX_NOHOST      = 68
+EX_UNAVAILABLE = 69
+EX_SOFTWARE    = 70
+EX_OSERR       = 71
+EX_OSFILE      = 72
+EX_CANTCREAT   = 73
+EX_IOERR       = 74
+EX_TEMPFAIL    = 75
+EX_PROTOCOL    = 76
+EX_NOPERM      = 77
+EX_CONFIG      = 78
+
 class CLI < Thor
-  def self.exit_on_failure?; true; end
+  def self.exit_on_failure?() true end
 
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
-  option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT"
+  long_desc <<~EOS
+    Generates code for a target language (e.g., C/C++/Java/Python/Ruby/etc).
+
+    Currently supported target formats and programming languages:
+
+      --format=c                     # C99
+      --format=c++                   # C++11
+      --format=dart                  # Dart & Flutter
+      --format=java                  # Java (JNA)
+      --format=lisp                  # Common Lisp (CFFI)
+      --format=python                # Python (ctypes)
+      --format=ruby                  # Ruby (FFI)
+      --format=yaml                  # YAML
+
+    For example:
+
+      $ ffidb export lua -f=c        # Export Lua bindings as C code
+      $ ffidb export lua -f=cpp      # Export Lua bindings as C++ code
+      $ ffidb export lua -f=java     # Export Lua bindings as Java JNA code
+      $ ffidb export lua -f=python   # Export Lua bindings as Python ctypes code
+      $ ffidb export lua -f=ruby     # Export Lua bindings as Ruby FFI code
+  EOS
+  option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT (for example: java)"
   option :library_path, aliases: '-L', banner: 'DIRECTORY', desc: "Load all libraries from DIRECTORY"
   option :exclude, repeatable: true, banner: 'PATTERN', desc: "Exclude symbols matching the glob PATTERN"
   option :exclude_from, repeatable: true, banner: 'FILE', desc: "Read exclude patterns from FILE"
-  def export(keyword, *keywords)
-    keywords.prepend(keyword)
+  def export(pattern, *patterns)
+    patterns.prepend(pattern)
 
-    format = (self.options[:format] || 'c').to_sym
+    format = (self.options[:format] || 'yaml').to_sym
     excludes = (self.options[:exclude] || [])
     (self.options[:exclude_from] || []).map do |exclude_path|
       exclude_path = Pathname(exclude_path)
@@ -36,13 +74,13 @@ class CLI < Thor
 
     FFIDB::Registry.open do |registry|
       exports = []
-      keywords.each do |keyword|
-        if library = registry.open_library(keyword)
+      patterns.each do |pattern|
+        if library = registry.open_library(pattern)
           library.each_function do |function|
             exports << [library, function] unless excludes.any? { |x| x === function.name }
           end
         else
-          matcher = FFIDB::Glob.new(keyword, ignore_case: true, match_substring: false)
+          matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: false)
           registry.find_functions(matcher) do |function, library|
             exports << [library, function] unless excludes.any? { |x| x === function.name }
           end
@@ -64,10 +102,20 @@ class CLI < Thor
     end
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
   desc "init", "Initialize the registry (at: ~/.ffidb)"
+  long_desc <<~EOS
+    Initializes the local FFIDB registry, a prerequisite for using FFIDB.
+
+    Your local FFIDB registry is located at $HOME/.ffidb (#{FFIDB::Registry.default_path}).
+
+    This command is equivalent to:
+
+      $ git clone --depth=1 #{FFIDB::Registry::GIT_HTTPS_URL} $HOME/.ffidb
+  EOS
   def init
     registry_path = FFIDB::Registry.default_path
     if registry_path.exist?
@@ -83,11 +131,19 @@ class CLI < Thor
     Dir.chdir registry_path
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
-  desc "list [LIBRARY]", "List libraries and functions"
-  def list(library_name = nil)
+  desc "list [LIBRARY]", "List FFI libraries and symbols"
+  long_desc <<~EOS
+    Lists libraries with their FFI symbols (such as functions).
+
+    For example:
+
+      $ ffidb list lua
+  EOS
+  def list(library_name = nil) # FIXME
     FFIDB::Registry.open do |registry|
       registry.each_library do |library|
         next if library_name && library_name != library.name
@@ -103,13 +159,21 @@ class CLI < Thor
     end
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
   desc "parse HEADER...", "Parse .h header files"
-  option :config, aliases: '-C', banner: 'FILE', desc: "Use a library.yaml configuration file"
-  option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define a preprocessor symbol"
-  option :include, aliases: '-I', repeatable: true, banner: 'DIRECTORY', desc: "Add a directory to the headers search path"
+  long_desc <<~EOS
+    Parses .h header files, outputting YAML using the FFIDB schema.
+
+    Note: parsing requires installation of the 'ffi-clang' library:
+
+      $ gem install ffi-clang
+  EOS
+  option :config, aliases: '-C', banner: 'FILE', desc: "Use a library.yaml configuration FILE"
+  option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define VAR as a preprocessor symbol"
+  option :include, aliases: '-I', repeatable: true, banner: 'DIRECTORY', desc: "Add DIRECTORY to the headers search path"
   def parse(path, *paths)
     base_directory = nil
     paths.prepend(path)
@@ -132,7 +196,8 @@ class CLI < Thor
       $VERBOSE = false
     rescue LoadError => error
       raise error if self.options[:debug]
-      abort error.to_s
+      say "#{$0}: #{set_color(error, :red)}"
+      exit EX_UNAVAILABLE
     end
 
     FFIDB::Parser.new(base_directory: base_directory, debug: self.options[:verbose] || self.options[:debug]).tap do |parser|
@@ -176,12 +241,20 @@ class CLI < Thor
     end
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
-  desc "search KEYWORD", "Search for functions using a glob keyword"
-  def search(keyword)
-    matcher = FFIDB::Glob.new(keyword, ignore_case: true, match_substring: true)
+  desc "search PATTERN", "Search for FFI symbols using a glob pattern"
+  long_desc <<~EOS
+    Searches for FFI symbols (for example, functions) using a glob pattern.
+
+    For example:
+
+      $ ffidb search sqlite3_*_blob
+  EOS
+  def search(pattern)
+    matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: true)
     p self.options, matcher if self.options[:debug]
     FFIDB::Registry.open do |registry|
       registry.find_functions(matcher) do |function, library|
@@ -189,12 +262,20 @@ class CLI < Thor
       end
     end
   rescue => error
-    abort "#{$0}: #{error}"
     raise error if self.options[:debug]
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
-  desc "show SYMBOL", "Show function information"
-  option :format, aliases: '-f', default: nil, desc: "Specify the output format" # TODO
+  desc "show SYMBOL", "Show FFI symbol information"
+  long_desc <<~EOS
+    Shows information about an FFI symbol (for example, a function).
+
+    For example:
+
+      $ ffidb show lua_callk
+  EOS
+  #option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT" # TODO
   def show(function)
     p self.options, function if self.options[:debug]
     FFIDB::Registry.open do |registry|
@@ -206,10 +287,20 @@ class CLI < Thor
     end
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 
   desc "update", "Fetch updates to the registry (at: ~/.ffidb)"
+  long_desc <<~EOS
+    Updates the local FFIDB registry, pulling updates from GitHub.
+
+    Your local FFIDB registry is located at $HOME/.ffidb (#{FFIDB::Registry.default_path}).
+
+    This command is equivalent to:
+
+      $ cd $HOME/.ffidb && git pull
+  EOS
   def update
     registry_path = FFIDB::Registry.default_path
     raise "Registry at #{registry_path} not initialized (run `#{$0} init` first?)" unless registry_path.exist?
@@ -222,8 +313,24 @@ class CLI < Thor
     end
   rescue => error
     raise error if self.options[:debug]
-    abort "#{$0}: #{error}"
+    say "#{$0}: #{set_color(error, :red)}"
+    exit EX_SOFTWARE
   end
 end # CLI
+
+# Fix for https://github.com/erikhuda/thor/issues/398
+class Thor::Shell::Basic
+  def print_wrapped(message, options = {})
+    indent = (options[:indent] || 0).to_i
+    if indent.zero?
+      self.stdout.puts message
+    else
+      message.each_line do |message_line|
+        self.stdout.print ' ' * indent
+        self.stdout.puts message_line.chomp
+      end
+    end
+  end
+end # Thor::Shell::Basic
 
 CLI.start(ARGV)

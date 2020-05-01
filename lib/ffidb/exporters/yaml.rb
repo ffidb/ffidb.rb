@@ -7,8 +7,10 @@ module FFIDB::Exporters
   # Code generator for the YAML markup language.
   class YAML < FFIDB::Exporter
     def export_function(function)
-      puts
+      @counter ||= 0
+      puts unless @counter.zero?
       puts function.to_yaml
+      @counter += 1
     end
   end # YAML
 end # FFIDB::Exporters
