@@ -85,9 +85,10 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
+      soname = self.dlopen_paths_for(library).first # FIXME
       puts
       puts <<~EOS
-      final #{@library.name} = ffi.DynamicLibrary.open('#{@library.soname}');
+      final #{@library.name} = ffi.DynamicLibrary.open('#{soname}');
       EOS
     end
 

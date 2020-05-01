@@ -43,6 +43,14 @@ module FFIDB
       end
     end
 
+    def dlopen_paths_for(library)
+      if library_path = self.options[:library_path]
+        library.objects.map { |lib| library_path.delete_suffix('/') << "/" << lib }
+      else
+        library.objects + [library.dlopen]
+      end
+    end
+
     def begin() end
 
     def begin_library(library) end

@@ -56,9 +56,18 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
-      sonames = library.objects.map { |soname| "ctypes.util.find_library('#{soname}')" }
       puts
-      puts "#{library.name} = ctypes.CDLL(#{sonames.join(' or ')} or '#{library.dlopen}')"
+      print library.name, ' = ctypes.CDLL('
+      puts
+      self.dlopen_paths_for(library).each_with_index do |library_path, i|
+        print '    '
+        print 'or ' unless i.zero?
+        print 'ctypes.util.find_library("', library_path, '")'
+        puts
+      end
+      print '    or "', library.dlopen, '"' unless self.options[:library_path]
+      puts unless self.options[:library_path]
+      puts ")"
     end
 
     def export_function(function)

@@ -56,10 +56,11 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
+      soname = self.dlopen_paths_for(library).first # FIXME
       puts
       puts <<~EOS
       (cffi:define-foreign-library #{@library.name}
-        (t (:default "#{@library.soname}")))
+        (t (:default "#{soname}")))
 
       (cffi:use-foreign-library #{@library.name})
       EOS

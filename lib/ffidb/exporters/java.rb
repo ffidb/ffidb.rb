@@ -63,9 +63,10 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @interface = library.name.capitalize
+      soname = self.dlopen_paths_for(library).first # FIXME
       puts <<~EOS
       public interface #{@interface} extends Library {
-        #{@interface} INSTANCE = (#{@interface})Native.load("#{library.soname}", #{@interface}.class);
+        #{@interface} INSTANCE = (#{@interface})Native.load("#{soname}", #{@interface}.class);
       EOS
     end
 

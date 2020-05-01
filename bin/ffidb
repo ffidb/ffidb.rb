@@ -16,10 +16,12 @@ class CLI < Thor
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
   option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT"
+  option :library_path, aliases: '-L', banner: 'DIRECTORY', desc: "Load all libraries from DIRECTORY"
   option :exclude, repeatable: true, banner: 'PATTERN', desc: "Exclude symbols matching the glob PATTERN"
   option :exclude_from, repeatable: true, banner: 'FILE', desc: "Read exclude patterns from FILE"
   def export(keyword, *keywords)
     keywords.prepend(keyword)
+
     format = (self.options[:format] || 'c').to_sym
     excludes = (self.options[:exclude] || [])
     (self.options[:exclude_from] || []).map do |exclude_path|
