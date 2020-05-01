@@ -11,21 +11,6 @@ module FFIDB::Exporters
     # @see https://docs.python.org/3/library/ctypes.html
     TYPE_MAP = {
       'void'               => :None,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # <stddef.h>
-      'size_t'             => :size_t,
-      # <stdint.h>
-      'int8_t'             => :int8,
-      'int16_t'            => :int16,
-      'int32_t'            => :int32,
-      'int64_t'            => :int64,
-      'uint8_t'            => :uint8,
-      'uint16_t'           => :uint16,
-      'uint32_t'           => :uint32,
-      'uint64_t'           => :uint64,
-      'intptr_t'           => :void_p,
-      'uintptr_t'          => :void_p,
       # standard signed-integer types:
       'char'               => :char,
       'short'              => :short,
@@ -41,10 +26,32 @@ module FFIDB::Exporters
       # standard floating-point types:
       'float'              => :float,
       'double'             => :double,
+      'long double'        => :longdouble,
       # standard character-sequence types:
       'char *'             => :char_p,
       'const char *'       => :char_p,
-      # miscellaneous types:
+      # <stdarg.h>
+      'va_list'.           => :void_p,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # <stddef.h>
+      'size_t'             => :size_t,
+      'wchar_t'            => :wchar_t,
+      # <stdint.h>
+      'int8_t'             => :int8,
+      'int16_t'            => :int16,
+      'int32_t'            => :int32,
+      'int64_t'            => :int64,
+      'uint8_t'            => :uint8,
+      'uint16_t'           => :uint16,
+      'uint32_t'           => :uint32,
+      'uint64_t'           => :uint64,
+      'intptr_t'           => :void_p,
+      'uintptr_t'          => :void_p,
+      # <sys/types.h>
+      'ssize_t'            => :ssize_t,
+      'off_t'              => :size_t, # TODO: https://stackoverflow.com/q/43671524
+      # all other types:
       nil                  => :void_p,
     }
 

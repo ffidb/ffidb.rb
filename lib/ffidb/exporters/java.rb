@@ -12,21 +12,6 @@ module FFIDB::Exporters
     # @see https://java-native-access.github.io/jna/5.5.0/javadoc/overview-summary.html#marshalling
     TYPE_MAP = {
       'void'               => :void,
-      # <stdbool.h>
-      '_Bool'              => :boolean,
-      # <stddef.h>
-      'size_t'             => :size_t, # https://github.com/java-native-access/jna/issues/1113
-      # <stdint.h>
-      'int8_t'             => :byte,
-      'int16_t'            => :short,
-      'int32_t'            => :int,
-      'int64_t'            => :long,
-      'uint8_t'            => :byte,
-      'uint16_t'           => :short,
-      'uint32_t'           => :int,
-      'uint64_t'           => :long,
-      'intptr_t'           => :Pointer,
-      'uintptr_t'          => :Pointer,
       # standard signed-integer types:
       'char'               => :byte,
       'short'              => :short,
@@ -42,10 +27,32 @@ module FFIDB::Exporters
       # standard floating-point types:
       'float'              => :float,
       'double'             => :double,
+      'long double'        => nil, # https://github.com/java-native-access/jna/issues/860
       # standard character-sequence types:
       'char *'             => :String,
       'const char *'       => :String,
-      # miscellaneous types:
+      # <stdarg.h>
+      'va_list'.           => :Pointer,
+      # <stdbool.h>
+      '_Bool'              => :boolean,
+      # <stddef.h>
+      'size_t'             => :size_t, # https://github.com/java-native-access/jna/issues/1113
+      'wchar_t'            => :char,
+      # <stdint.h>
+      'int8_t'             => :byte,
+      'int16_t'            => :short,
+      'int32_t'            => :int,
+      'int64_t'            => :long,
+      'uint8_t'            => :byte,
+      'uint16_t'           => :short,
+      'uint32_t'           => :int,
+      'uint64_t'           => :long,
+      'intptr_t'           => :Pointer,
+      'uintptr_t'          => :Pointer,
+      # <sys/types.h>
+      'ssize_t'            => :ssize_t,
+      'off_t'              => :size_t, # TODO
+      # all other types:
       nil                  => :Pointer,
     }
 
@@ -58,6 +65,7 @@ module FFIDB::Exporters
       import com.sun.jna.NativeLong;
       import com.sun.jna.Pointer;
       import com.sun.jna.Structure.FFIType.size_t;
+      import com.sun.jna.platform.linux.XAttr.ssize_t;
       EOS
     end
 

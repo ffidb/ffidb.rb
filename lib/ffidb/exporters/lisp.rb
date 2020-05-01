@@ -11,21 +11,6 @@ module FFIDB::Exporters
     # @see https://common-lisp.net/project/cffi/manual/html_node/Foreign-Types.html
     TYPE_MAP = {
       'void'               => :void,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # <stddef.h>
-      'size_t'             => :uint, # TODO
-      # <stdint.h>
-      'int8_t'             => :int8,
-      'int16_t'            => :int16,
-      'int32_t'            => :int32,
-      'int64_t'            => :int64,
-      'uint8_t'            => :uint8,
-      'uint16_t'           => :uint16,
-      'uint32_t'           => :uint32,
-      'uint64_t'           => :uint64,
-      'intptr_t'           => :pointer,
-      'uintptr_t'          => :pointer,
       # standard signed-integer types:
       'char'               => :char,
       'short'              => :short,
@@ -41,10 +26,32 @@ module FFIDB::Exporters
       # standard floating-point types:
       'float'              => :float,
       'double'             => :double,
+      'long double'        => :'long-double',
       # standard character-sequence types:
       'char *'             => :string,
       'const char *'       => :string,
-      # miscellaneous types:
+      # <stdarg.h>
+      'va_list'.           => :pointer,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # <stddef.h>
+      'size_t'             => :'size-t',
+      'wchar_t'            => :int,  # TODO: https://stackoverflow.com/a/13510080
+      # <stdint.h>
+      'int8_t'             => :int8,
+      'int16_t'            => :int16,
+      'int32_t'            => :int32,
+      'int64_t'            => :int64,
+      'uint8_t'            => :uint8,
+      'uint16_t'           => :uint16,
+      'uint32_t'           => :uint32,
+      'uint64_t'           => :uint64,
+      'intptr_t'           => :pointer,
+      'uintptr_t'          => :pointer,
+      # <sys/types.h>
+      'ssize_t'            => :long,  # TODO
+      'off_t'              => :ulong, # TODO
+      # all other types:
       nil                  => :pointer,
     }
 

@@ -11,21 +11,6 @@ module FFIDB::Exporters
     # @see https://github.com/ffi/ffi/wiki/Types
     TYPE_MAP = {
       'void'               => :void,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # <stddef.h>
-      'size_t'             => :size_t,
-      # <stdint.h>
-      'int8_t'             => :int8,
-      'int16_t'            => :int16,
-      'int32_t'            => :int32,
-      'int64_t'            => :int64,
-      'uint8_t'            => :uint8,
-      'uint16_t'           => :uint16,
-      'uint32_t'           => :uint32,
-      'uint64_t'           => :uint64,
-      'intptr_t'           => :pointer,
-      'uintptr_t'          => :pointer,
       # standard signed-integer types:
       'char'               => :char,
       'short'              => :short,
@@ -41,10 +26,32 @@ module FFIDB::Exporters
       # standard floating-point types:
       'float'              => :float,
       'double'             => :double,
+      'long double'        => :long_double,
       # standard character-sequence types:
       'char *'             => :string,
       'const char *'       => :string,
-      # miscellaneous types:
+      # <stdarg.h>
+      'va_list'.           => :pointer,
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # <stddef.h>
+      'size_t'             => :size_t,
+      'wchar_t'            => :wchar_t,
+      # <stdint.h>
+      'int8_t'             => :int8,
+      'int16_t'            => :int16,
+      'int32_t'            => :int32,
+      'int64_t'            => :int64,
+      'uint8_t'            => :uint8,
+      'uint16_t'           => :uint16,
+      'uint32_t'           => :uint32,
+      'uint64_t'           => :uint64,
+      'intptr_t'           => :pointer,
+      'uintptr_t'          => :pointer,
+      # <sys/types.h>
+      'ssize_t'            => :ssize_t,
+      'off_t'              => :off_t,
+      # all other types:
       nil                  => :pointer,
     }
 

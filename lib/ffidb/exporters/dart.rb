@@ -13,10 +13,32 @@ module FFIDB::Exporters
     # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
     TYPE_MAP_FFI = {
       'void'               => :Void,
+      # standard signed-integer types:
+      'char'               => :Int8,
+      'short'              => :Int16,
+      'int'                => :Int32,
+      'long'               => :Int64,  # TODO
+      'long long'          => :Int64,
+      # standard unsigned-integer types:
+      'unsigned char'      => :Uint8,
+      'unsigned short'     => :Uint16,
+      'unsigned int'       => :Uint32,
+      'unsigned long'      => :Uint64, # TODO
+      'unsigned long long' => :Uint64,
+      # standard floating-point types:
+      'float'              => :Float,
+      'double'             => :Double,
+      'long double'        => nil, # not supported
+      # standard character-sequence types:
+      'char *'             => 'Pointer<ffi.Int8>', # TODO: Utf8
+      'const char *'       => 'Pointer<ffi.Int8>', # TODO: Utf8
+      # <stdarg.h>
+      'va_list'.           => 'Pointer<ffi.Void>',
       # <stdbool.h>
-      '_Bool'              => :Int8, # TODO
+      '_Bool'              => :Int8,   # TODO
       # <stddef.h>
       'size_t'             => :Uint64, # TODO
+      'wchar_t'            => :Int32,  # TODO
       # <stdint.h>
       'int8_t'             => :Int8,
       'int16_t'            => :Int16,
@@ -28,33 +50,16 @@ module FFIDB::Exporters
       'uint64_t'           => :Uint64,
       'intptr_t'           => :IntPtr,
       'uintptr_t'          => :IntPtr,
-      # standard signed-integer types:
-      'char'               => :Int8,
-      'short'              => :Int16,
-      'int'                => :Int32,
-      'long'               => :Int64, # TODO
-      'long long'          => :Int64,
-      # standard unsigned-integer types:
-      'unsigned char'      => :Uint8,
-      'unsigned short'     => :Uint16,
-      'unsigned int'       => :Uint32,
-      'unsigned long'      => :Uint64, # TODO
-      'unsigned long long' => :Uint64,
-      # standard floating-point types:
-      'float'              => :Float,
-      'double'             => :Double,
-      # standard character-sequence types:
-      'char *'             => 'Pointer<ffi.Int8>', # TODO: Utf8
-      'const char *'       => 'Pointer<ffi.Int8>', # TODO: Utf8
-      # miscellaneous types:
+      # <sys/types.h>
+      'ssize_t'            => :Int64,  # TODO
+      'off_t'              => :Uint64, # TODO
+      # all other types:
       nil                  => 'Pointer<ffi.Void>',
     }
 
     # @see https://dart.dev/guides/language/language-tour
     TYPE_MAP_DART = {
       'void'               => :void,
-      # <stdbool.h>
-      '_Bool'              => :bool,
       # standard signed-integer types:
       'char'               => :int,
       'short'              => :int,
@@ -70,7 +75,9 @@ module FFIDB::Exporters
       # standard floating-point types:
       'float'              => :double,
       'double'             => :double,
-      # miscellaneous types:
+      # <stdbool.h>
+      '_Bool'              => :bool,
+      # all other types:
       nil                  => nil,
     }
 
