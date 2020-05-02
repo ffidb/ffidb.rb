@@ -84,8 +84,8 @@ module FFIDB
             when :cursor_function
               function_name = declaration.spelling
               location_file = location.file
-              if okayed_files[location_file] ||= self.consider_path?(location_file) &&
-                  !self.exclude_symbols.include?(function_name)
+              if !self.exclude_symbols.include?(function_name) &&
+                  (okayed_files[location_file] ||= self.consider_path?(location_file))
                 function = self.parse_function(declaration)
                 function.definition = self.parse_location(location)
                 header.functions << function
