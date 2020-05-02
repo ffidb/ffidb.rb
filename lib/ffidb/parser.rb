@@ -57,6 +57,7 @@ module FFIDB
     ##
     # @param  [Pathname, #to_s] path
     # @yield  [exception]
+    # @raise  [ParsePanic] if parsing encounters a fatal error
     # @return [Header]
     def parse_header(path)
       path = Pathname(path.to_s) unless path.is_a?(Pathname)
@@ -64,10 +65,16 @@ module FFIDB
       args = self.defines.inject([]) { |r, (k, v)| r << "-D#{k}=#{v}" }
       args += self.include_paths.map { |p| "-I#{p}" }
 
-      translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
+      translation_unit = nil
+      begin
+        translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
+      rescue FFI::Clang::Error => error
+        raise ParsePanic.new(error.to_s)
+      end
+
       translation_unit.diagnostics.each do |diagnostic|
         exception_class = case diagnostic.severity.to_sym
-          when :fatal then ParsePanic
+          when :fatal then raise ParsePanic.new(diagnostic.format)
           when :error then ParseError
           when :warning then ParseWarning
           else ParseWarning

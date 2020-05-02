@@ -216,11 +216,11 @@ class CLI < Thor
       paths.each do |path|
         header = parser.parse_header(path) do |exception|
           case exception
-            when FFIDB::ParsePanic then raise exception
             when FFIDB::ParseError
               warn "#{$0}: #{exception}" unless quiet?
             when FFIDB::ParseWarning
               warn "#{$0}: #{exception}" if verbose?
+            else raise exception
           end
         end
         header.functions.sort.each do |function|
