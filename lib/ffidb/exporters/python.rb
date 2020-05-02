@@ -90,7 +90,7 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [String, #to_s] c_type
+    # @param  [FFIDB::Type] c_type
     # @return [String]
     def py_type(c_type)
       case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]

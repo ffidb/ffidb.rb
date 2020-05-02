@@ -50,8 +50,8 @@ module FFIDB
     def to_h
       {
         name: self.name,
-        type: self.type,
-        parameters: self.parameters&.transform_values { |v| v.type },
+        type: self.type.to_s,
+        parameters: self.parameters&.transform_values { |v| v.type.to_s },
         definition: self.definition&.to_h,
         comment: self.comment,
       }.delete_if { |k, v| v.nil? }

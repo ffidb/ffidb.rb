@@ -72,6 +72,7 @@ module FFIDB::Exporters
     def begin_library(library)
       @interface = library.name.capitalize
       soname = self.dlopen_paths_for(library).first # FIXME
+      puts
       puts <<~EOS
       public interface #{@interface} extends Library {
         #{@interface} INSTANCE = (#{@interface})Native.load("#{soname}", #{@interface}.class);
@@ -91,7 +92,7 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [String] c_type
+    # @param  [FFIDB::Type] c_type
     # @return [Symbol]
     def jna_type(c_type)
       TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]

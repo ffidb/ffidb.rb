@@ -129,14 +129,12 @@ module FFIDB
       name = declaration.spelling
       type = self.parse_type(declaration.type)
       FFIDB::Parameter.new(
-        name: ((name.nil? || name.empty?) ? default_name.to_s : name).to_sym,
-        type: type,
-      )
+        ((name.nil? || name.empty?) ? default_name.to_s : name).to_sym, type)
     end
 
     ##
     # @param  [FFI::Clang::Type] type
-    # @return [String]
+    # @return [Type]
     def parse_type(type)
       ostensible_type = type.spelling
       pointer_suffix = case ostensible_type
@@ -147,9 +145,9 @@ module FFIDB
       end
       if self.preserve_type?(ostensible_type)
         ostensible_type << pointer_suffix if pointer_suffix
-        ostensible_type
+        Type.new(ostensible_type)
       else
-        type.canonical.spelling
+        Type.new(type.canonical.spelling)
       end
     end
 

@@ -85,7 +85,7 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [String] c_type
+    # @param  [FFIDB::Type] c_type
     # @return [Symbol]
     def cffi_type(c_type)
       TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]

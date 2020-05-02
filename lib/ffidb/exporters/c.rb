@@ -26,18 +26,18 @@ module FFIDB::Exporters
 
     def export_function(function)
       parameters = function.parameters.each_value.map do |p|
-        p.type = p.type.gsub('const char *const[]', 'const char * const *') # FIXME
-        if p.type.include?('(*)') # function pointer
-          p.type.sub('(*)', "(*#{p.name})")
+        p_type = if p.type.function_pointer?
+          p.type.to_s.sub('(*)', "(*#{p.name})")
         else
           "#{p.type} #{p.name}"
         end
+        p_type.gsub('const char *const[]', 'const char * const *') # FIXME
       end
       indent = self.class.const_get(:SYMBOL_INDENT)
       print ' ' * indent if indent && indent.nonzero?
       print self.class.const_get(:EXTERN_QUALIFIER), ' '
-      if function.type.include?('(*)')
-        print function.type.sub('(*)', "(*#{function.name}(#{parameters.join(', ')}))")
+      if function.type.function_pointer?
+        print function.type.to_s.sub('(*)', "(*#{function.name}(#{parameters.join(', ')}))")
       else
         print function.type, ' ', function.name, '('
         parameters.each_with_index do |p, i|

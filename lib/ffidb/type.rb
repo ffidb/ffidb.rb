@@ -137,5 +137,11 @@ module FFIDB
     def to_h
       {spec: self.spec}
     end
+
+    ##
+    # @return [String]
+    def inspect
+      "#{self.class}(#{self.spec.inspect})"
+    end
   end # Type
 end # FFIDB

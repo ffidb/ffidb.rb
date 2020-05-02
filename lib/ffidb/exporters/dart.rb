@@ -113,14 +113,14 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [String] c_type
+    # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def dart_type(c_type)
       TYPE_MAP_DART[c_type.to_s] || self.ffi_type(c_type)
     end
 
     ##
-    # @param  [String] c_type
+    # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def ffi_type(c_type)
       ffi_type = TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
@@ -128,5 +128,3 @@ module FFIDB::Exporters
     end
   end # Dart
 end # FFIDB::Exporters
-
-# TODO: https://api.dart.dev/stable/2.8.0/dart-ffi/dart-ffi-library.html

@@ -79,12 +79,12 @@ module FFIDB
                 yaml = yaml_doc.to_ruby.transform_keys!(&:to_sym)
                 parameters = (yaml[:parameters] || {}).inject({}) do |ps, (k, v)|
                   k = k.to_sym
-                  ps[k] = Parameter.new(name: k, type: v)
+                  ps[k] = Parameter.new(k, Type.new(v))
                   ps
                 end
                 yield Function.new(
                   name: yaml[:name],
-                  type: yaml[:type],
+                  type: Type.new(yaml[:type]),
                   parameters: parameters,
                   definition: !yaml.has_key?(:definition) ? nil : Location.new(
                     file: yaml.dig(:definition, 'file'),

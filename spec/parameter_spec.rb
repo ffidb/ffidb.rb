@@ -6,7 +6,7 @@ include FFIDB
 
 RSpec.describe FFIDB::Parameter do
   it "is comparable based on the name" do
-    a, b, c = Parameter.new(name: 'a'), Parameter.new(name: 'b'), Parameter.new(name: 'c')
+    a, b, c = Parameter.new('a'), Parameter.new('b'), Parameter.new('c')
     expect(a == a).to be true
     expect(a != b).to be true
     expect(a < b).to be true
@@ -18,10 +18,10 @@ RSpec.describe FFIDB::Parameter do
   end
 
   describe "#eql?" do
-    a_int  = Parameter.new(name: 'a', type: 'int')
-    a_long = Parameter.new(name: 'a', type: 'long')
-    b_int  = Parameter.new(name: 'b', type: 'int')
-    b_long = Parameter.new(name: 'b', type: 'long')
+    a_int  = Parameter.new('a', 'int')
+    a_long = Parameter.new('a', 'long')
+    b_int  = Parameter.new('b', 'int')
+    b_long = Parameter.new('b', 'long')
 
     it "returns true when all attributes are equal" do
       expect(a_int).to eql(a_int.dup)
