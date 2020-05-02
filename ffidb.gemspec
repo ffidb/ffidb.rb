@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.date               = File.mtime('VERSION').strftime('%Y-%m-%d')
 
   gem.name               = 'ffidb'
-  gem.homepage           = 'https://github.com/ffidb/ffidb.rb'
+  gem.homepage           = 'https://github.com/ffidb'
   gem.license            = 'Unlicense'
   gem.summary            = 'Command-line interface (CLI) for the FFI DB registry.'
   gem.description        = gem.summary
