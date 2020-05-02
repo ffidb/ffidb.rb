@@ -28,6 +28,7 @@ class CLI < Thor
       --format=dart                  # Dart & Flutter
       --format=go                    # Go (cgo)
       --format=java                  # Java (JNA)
+      --format=json                  # JSON
       --format=lisp                  # Common Lisp (CFFI)
       --format=python                # Python (ctypes)
       --format=ruby                  # Ruby (FFI)

@@ -10,6 +10,7 @@ module FFIDB
         when :dart, :flutter then Exporters::Dart
         when :go, :cgo then Exporters::Go
         when :java, :jna then Exporters::Java
+        when :json then Exporters::JSON
         when :lisp, :'common-lisp' then Exporters::Lisp
         when :python, :py then Exporters::Python
         when :ruby, :rb then Exporters::Ruby
