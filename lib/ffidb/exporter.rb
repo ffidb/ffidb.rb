@@ -8,11 +8,12 @@ module FFIDB
         when :c, :c99, :c11, :c18 then Exporters::C
         when :'c++', :'c++11', :'c++14', :'c++17', :'c++20', :cpp, :cxx then Exporters::Cpp
         when :dart, :flutter then Exporters::Dart
+        when :go, :cgo then Exporters::Go
         when :java, :jna then Exporters::Java
         when :lisp, :'common-lisp' then Exporters::Lisp
         when :python, :py then Exporters::Python
         when :ruby, :rb then Exporters::Ruby
-        # TODO: csharp, go, haskell, julia, luajit, nim, nodejs, ocaml, php, racket, rust, zig
+        # TODO: csharp, haskell, julia, luajit, nim, nodejs, ocaml, php, racket, rust, zig
         when :yaml then Exporters::YAML
         else raise "unknown output format: #{format}"
       end

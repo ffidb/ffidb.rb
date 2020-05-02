@@ -30,7 +30,7 @@ class CLI < Thor
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
   class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
 
-  desc "export LIBRARY|SYMBOL...", "Generate C/C++/Java/Python/Ruby/etc code"
+  desc "export LIBRARY|SYMBOL...", "Generate C/C++/Go/Java/Python/Ruby/etc code"
   long_desc <<~EOS
     Generates code for a target language (e.g., C/C++/Java/Python/Ruby/etc).
 
@@ -39,6 +39,7 @@ class CLI < Thor
       --format=c                     # C99
       --format=c++                   # C++11
       --format=dart                  # Dart & Flutter
+      --format=go                    # Go (cgo)
       --format=java                  # Java (JNA)
       --format=lisp                  # Common Lisp (CFFI)
       --format=python                # Python (ctypes)
