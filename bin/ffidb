@@ -8,23 +8,9 @@ require 'thor' # https://rubygems.org/gems/thor
 require 'pathname'
 require 'yaml'
 
-EX_USAGE       = 64
-EX_DATAERR     = 65
-EX_NOINPUT     = 66
-EX_NOUSER      = 67
-EX_NOHOST      = 68
-EX_UNAVAILABLE = 69
-EX_SOFTWARE    = 70
-EX_OSERR       = 71
-EX_OSFILE      = 72
-EX_CANTCREAT   = 73
-EX_IOERR       = 74
-EX_TEMPFAIL    = 75
-EX_PROTOCOL    = 76
-EX_NOPERM      = 77
-EX_CONFIG      = 78
-
 class CLI < Thor
+  include FFIDB::Sysexits
+
   def self.exit_on_failure?() true end
 
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
@@ -105,7 +91,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "init", "Initialize the registry (at: ~/.ffidb)"
@@ -134,7 +120,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "list [LIBRARY]", "List FFI libraries and symbols"
@@ -162,7 +148,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "parse HEADER...", "Parse .h header files"
@@ -249,7 +235,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "search PATTERN", "Search for FFI symbols using a glob pattern"
@@ -271,7 +257,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "show SYMBOL", "Show FFI symbol information"
@@ -290,12 +276,12 @@ class CLI < Thor
         puts function.to_yaml
         puts
       end
-      raise "Function not found: #{function}" unless found
+      raise FFIDB::FunctionNotFound.new(function) unless found
     end
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   desc "update", "Fetch updates to the registry (at: ~/.ffidb)"
@@ -321,7 +307,7 @@ class CLI < Thor
   rescue => error
     raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
-    exit EX_SOFTWARE
+    exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
   private

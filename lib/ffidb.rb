@@ -11,6 +11,7 @@ require_relative 'ffidb/location'
 require_relative 'ffidb/parameter'
 require_relative 'ffidb/parser'
 require_relative 'ffidb/registry'
+require_relative 'ffidb/sysexits'
 require_relative 'ffidb/type'
 require_relative 'ffidb/version'
 
