@@ -49,7 +49,10 @@ class CLI < Thor
     patterns.prepend(pattern)
 
     format = (self.options[:format] || 'yaml').to_sym
-    excludes = (self.options[:exclude] || [])
+    excludes = []
+    (self.options[:exclude] || []).each do |symbol|
+      excludes += symbol.include?(',') ? symbol.split(',') : [symbol]
+    end
     (self.options[:exclude_from] || []).map do |exclude_path|
       exclude_path = Pathname(exclude_path)
       raise Errno::ENOENT, exclude_path.to_s unless exclude_path.exist?

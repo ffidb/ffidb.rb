@@ -48,11 +48,12 @@ module FFIDB
     end
 
     ##
-    # @param  [Symbol, #to_s] symbol_name
+    # @param  [Array<#to_s>] symbols
     # @return [void]
-    def exclude_symbol!(symbol)
-      self.exclude_symbols << symbol.to_s
+    def exclude_symbols!(*symbols)
+      self.exclude_symbols += symbols.map(&:to_s)
     end
+    alias_method :exclude_symbol!, :exclude_symbols!
 
     ##
     # @param  [Pathname, #to_s] path
