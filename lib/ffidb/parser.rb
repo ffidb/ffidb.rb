@@ -66,15 +66,16 @@ module FFIDB
 
       translation_unit = @clang_index.parse_translation_unit(path.to_s, args)
       translation_unit.diagnostics.each do |diagnostic|
-        exception = case diagnostic.severity.to_sym
-          when :fatal then ParseError.new(diagnostic.format)
-          when :warning then ParseWarning.new(diagnostic.format)
-          else ParseWarning.new(diagnostic.format)
+        exception_class = case diagnostic.severity.to_sym
+          when :fatal then ParsePanic
+          when :error then ParseError
+          when :warning then ParseWarning
+          else ParseWarning
         end
-        yield exception
+        yield exception_class.new(diagnostic.format)
       end
 
-      base_directory_str = base_directory.to_s.freeze
+      okayed_files = {}
       FFIDB::Header.new(name: name, functions: []).tap do |header|
         root_cursor = translation_unit.cursor
         root_cursor.visit_children do |declaration, _|
@@ -82,7 +83,9 @@ module FFIDB
           case declaration.kind
             when :cursor_function
               function_name = declaration.spelling
-              if location.file.start_with?(base_directory_str) && !self.exclude_symbols.include?(function_name)
+              location_file = location.file
+              if okayed_files[location_file] ||= self.consider_path?(location_file) &&
+                  !self.exclude_symbols.include?(function_name)
                 function = self.parse_function(declaration)
                 function.definition = self.parse_location(location)
                 header.functions << function
@@ -178,6 +181,14 @@ module FFIDB
     end
 
     private
+
+    ##
+    # @param  [Pathname, #to_s] path
+    # @return [Pathname]
+    def consider_path?(path)
+      path = Pathname(path) unless path.is_a?(Pathname)
+      path.expand_path.to_s.start_with?(base_directory.expand_path.to_s << '/')
+    end
 
     ##
     # @param  [Pathname, #to_s] path

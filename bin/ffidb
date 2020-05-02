@@ -28,7 +28,8 @@ class CLI < Thor
   def self.exit_on_failure?() true end
 
   class_option :debug, aliases: '-d', type: :boolean, desc: "Enable debugging"
-  class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose"
+  class_option :verbose, aliases: '-v', type: :boolean, desc: "Be verbose (print warnings)"
+  class_option :quiet, aliases: '-q', type: :boolean, desc: "Be quiet (silence non-fatal errors)"
 
   desc "export LIBRARY|SYMBOL...", "Generate C/C++/Go/Java/Python/Ruby/etc code"
   long_desc <<~EOS
@@ -102,7 +103,7 @@ class CLI < Thor
       end
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -120,7 +121,7 @@ class CLI < Thor
   def init
     registry_path = FFIDB::Registry.default_path
     if registry_path.exist?
-      warn "#{$0}: The registry at #{registry_path} has already been initialized." if self.options[:verbose]
+      warn "#{$0}: The registry at #{registry_path} has already been initialized." if verbose?
       return
     end
     git_command = %Q(git clone --depth=1 #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path})
@@ -131,7 +132,7 @@ class CLI < Thor
     end
     Dir.chdir registry_path
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -148,18 +149,18 @@ class CLI < Thor
     FFIDB::Registry.open do |registry|
       registry.each_library do |library|
         next if library_name && library_name != library.name
-        p library if self.options[:debug]
+        p library if debug?
         library.each_function do |function|
-          p function if self.options[:debug]
+          p function if debug?
           print "#{library.name}"
-          print self.options[:verbose] ? "@#{library.version}" : '' # TODO: resolve stable symlinks
+          print verbose? ? "@#{library.version}" : '' # TODO: resolve stable symlinks
           print "\t#{function.name}"
-          puts self.options[:verbose] ? "\t\t// #{function.definition.to_s}" : '' # TODO: improve formatting
+          puts verbose? ? "\t\t// #{function.definition.to_s}" : '' # TODO: improve formatting
         end
       end
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -196,12 +197,12 @@ class CLI < Thor
       require 'ffi/clang' # https://rubygems.org/gems/ffi-clang
       $VERBOSE = false
     rescue LoadError => error
-      raise error if self.options[:debug]
+      raise error if debug?
       say "#{$0}: #{set_color(error, :red)}"
       exit EX_UNAVAILABLE
     end
 
-    FFIDB::Parser.new(base_directory: base_directory, debug: self.options[:verbose] || self.options[:debug]).tap do |parser|
+    FFIDB::Parser.new(base_directory: base_directory, debug: verbose? || debug?).tap do |parser|
       # Parse a library.yaml configuration file, if given:
       if config_path = self.options[:config]
         config_path = Pathname(config_path)
@@ -228,20 +229,25 @@ class CLI < Thor
       counter = 0
       paths.each do |path|
         header = parser.parse_header(path) do |exception|
-          raise exception if exception.is_a?(FFIDB::ParseError)
-          warn "#{$0}: #{exception}"
+          case exception
+            when FFIDB::ParsePanic then raise exception
+            when FFIDB::ParseError
+              warn "#{$0}: #{exception}" unless quiet?
+            when FFIDB::ParseWarning
+              warn "#{$0}: #{exception}" if verbose?
+          end
         end
         header.functions.sort.each do |function|
           puts unless counter.zero?
           counter += 1
-          p function if self.options[:debug]
+          p function if debug?
           puts '# ' + function.instance_variable_get(:@debug) if parser.debug
           puts function.to_yaml
         end
       end
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -256,14 +262,14 @@ class CLI < Thor
   EOS
   def search(pattern)
     matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: true)
-    p self.options, matcher if self.options[:debug]
+    p self.options, matcher if debug?
     FFIDB::Registry.open do |registry|
       registry.find_functions(matcher) do |function, library|
         puts "#{library.name}\t#{function.name}" # TODO: improve formatting
       end
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -278,7 +284,7 @@ class CLI < Thor
   EOS
   #option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT" # TODO
   def show(function)
-    p self.options, function if self.options[:debug]
+    p self.options, function if debug?
     FFIDB::Registry.open do |registry|
       found = registry.find_functions(function) do |function, library|
         puts function.to_yaml
@@ -287,7 +293,7 @@ class CLI < Thor
       raise "Function not found: #{function}" unless found
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
@@ -313,10 +319,16 @@ class CLI < Thor
       exit $?.exitstatus
     end
   rescue => error
-    raise error if self.options[:debug]
+    raise error if debug?
     say "#{$0}: #{set_color(error, :red)}"
     exit EX_SOFTWARE
   end
+
+  private
+
+  def debug?() self.options[:debug] end
+  def verbose?() self.options[:verbose] || self.debug? end
+  def quiet?() self.options[:quiet] end
 end # CLI
 
 # Fix for https://github.com/erikhuda/thor/issues/398

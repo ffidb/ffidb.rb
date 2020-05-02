@@ -6,7 +6,9 @@ module FFIDB
   # version of FFIDB.rb than the current one.
   class RegistryVersionMismatch < StandardError; end
 
+  class ParseWarning < StandardError; end
+
   class ParseError < StandardError; end
 
-  class ParseWarning < StandardError; end
+  class ParsePanic < StandardError; end
 end # FFIDB
