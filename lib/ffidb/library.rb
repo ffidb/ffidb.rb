@@ -31,15 +31,17 @@ module FFIDB
     def initialize(name, version, path)
       @name, @version = name.to_s.freeze, (version || :stable).to_s.freeze
       @path = Pathname(path).freeze
-      metadata  = YAML.load(@path.join('library.yaml').read).transform_keys(&:to_sym)
-      metadata.delete(:name)
-      @summary  = metadata.delete(:summary).freeze
-      @website  = metadata.delete(:website).freeze
-      @source   = metadata.delete(:source).freeze
-      @packages = metadata.delete(:packages).transform_keys(&:to_sym).freeze
-      @dlopen   = metadata.delete(:dlopen).freeze
-      @objects  = (metadata.delete(:objects) || []).freeze
-      @headers  = (metadata.delete(:headers) || []).freeze
+      if (metadata_path = @path.join('library.yaml')).exist?
+        metadata  = YAML.load(metadata_path.read).transform_keys(&:to_sym)
+        metadata.delete(:name)
+        @summary  = metadata.delete(:summary).freeze
+        @website  = metadata.delete(:website).freeze
+        @source   = metadata.delete(:source).freeze
+        @packages = metadata.delete(:packages).transform_keys(&:to_sym).freeze
+        @dlopen   = metadata.delete(:dlopen).freeze
+        @objects  = (metadata.delete(:objects) || []).freeze
+        @headers  = (metadata.delete(:headers) || []).freeze
+      end
     end
 
     ##
