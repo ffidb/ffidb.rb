@@ -1,6 +1,14 @@
 FFI DB Command-Line Interface (CLI)
 ===================================
 
+Installation
+------------
+
+The tool can be installed quickly and easily on any computer that has
+[Ruby](https://www.ruby-lang.org/en/) available:
+
+    $ gem install ffidb
+
 Reference
 ---------
 
