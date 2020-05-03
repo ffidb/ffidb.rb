@@ -170,6 +170,7 @@ module FFIDB
         when 'va_list' then true                          # <stdarg.h>
         when '_Bool'  then true                           # <stdbool.h>
         when 'size_t', 'wchar_t' then true                # <stddef.h>
+        when 'const size_t', 'const wchar_t' then true    # <stddef.h> # FIXME: need a better solution
         when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then true  # <stdint.h>
         when /^u?intptr_t$/ then true                     # <stdint.h>
         when 'ssize_t', 'off_t', 'off64_t' then true      # <sys/types.h>
