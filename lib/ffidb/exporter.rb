@@ -49,7 +49,7 @@ module FFIDB
       if library_path = self.options[:library_path]
         library.objects.map { |lib| library_path.delete_suffix('/') << "/" << lib }
       else
-        library.objects + [library.dlopen]
+        library.objects + library.dlopen
       end
     end
 

@@ -72,7 +72,7 @@ module FFIDB::Exporters
         print 'ctypes.util.find_library("', library_path, '")'
         puts
       end
-      print '    or "', library.dlopen, '"' unless self.options[:library_path]
+      print '    or "', library.dlopen.first, '"' unless self.options[:library_path] # TODO
       puts unless self.options[:library_path]
       puts ")"
     end

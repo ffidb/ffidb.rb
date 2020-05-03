@@ -28,7 +28,7 @@ module FFIDB::Exporters
     def begin_library(library)
       puts
       puts "// #{library.name} API"
-      puts "#cgo LDFLAGS: -l#{library.dlopen}"
+      puts "#cgo LDFLAGS: -l#{library.dlopen.first}"
     end
   end # Go
 end # FFIDB::Exporters

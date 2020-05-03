@@ -38,7 +38,8 @@ module FFIDB
         @website  = metadata.delete(:website).freeze
         @source   = metadata.delete(:source).freeze
         @packages = metadata.delete(:packages).transform_keys(&:to_sym).freeze
-        @dlopen   = metadata.delete(:dlopen).freeze
+        dlopen    = metadata.delete(:dlopen).freeze
+        @dlopen   = dlopen.is_a?(Array) ? dlopen : [dlopen]
         @objects  = (metadata.delete(:objects) || []).freeze
         @headers  = (metadata.delete(:headers) || []).freeze
       end
