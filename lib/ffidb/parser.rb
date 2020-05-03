@@ -51,7 +51,7 @@ module FFIDB
     # @param  [Array<#to_s>] symbols
     # @return [void]
     def exclude_symbols!(*symbols)
-      self.exclude_symbols += symbols.map(&:to_s)
+      self.exclude_symbols.append(*symbols.map(&:to_s))
     end
     alias_method :exclude_symbol!, :exclude_symbols!
 
