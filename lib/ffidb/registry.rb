@@ -43,7 +43,7 @@ module FFIDB
     def each_library(&block)
       return self.to_enum(:each_library) unless block_given?
       library_names = self.path.glob('*')
-        .select { |path| path.directory? }
+        .select { |path| path.directory? && !(path.symlink?) }
         .map { |path| path.basename.to_s }
         .sort
       library_names.each do |library_name|
