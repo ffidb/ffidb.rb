@@ -8,6 +8,7 @@ module FFIDB
     attr_reader :debug
     attr_reader :defines
     attr_reader :include_paths
+    attr_reader :include_symbols
     attr_reader :exclude_symbols
 
     ##
@@ -19,7 +20,8 @@ module FFIDB
       @debug = debug
       @defines = {}
       @include_paths = []
-      @exclude_symbols = []
+      @include_symbols = {}
+      @exclude_symbols = {}
       @clang_index = FFI::Clang::Index.new
     end
 
@@ -46,14 +48,6 @@ module FFIDB
     def add_include_path!(path)
       self.include_paths << Pathname(path)
     end
-
-    ##
-    # @param  [Array<#to_s>] symbols
-    # @return [void]
-    def exclude_symbols!(*symbols)
-      self.exclude_symbols.append(*symbols.map(&:to_s))
-    end
-    alias_method :exclude_symbol!, :exclude_symbols!
 
     ##
     # @param  [Pathname, #to_s] path
@@ -92,8 +86,7 @@ module FFIDB
             when :cursor_function
               function_name = declaration.spelling
               location_file = location.file
-              if !self.exclude_symbols.include?(function_name) &&
-                  (okayed_files[location_file] ||= self.consider_path?(location_file))
+              if (okayed_files[location_file] ||= self.consider_path?(location_file)) && self.consider_function?(function_name)
                 function = self.parse_function(declaration)
                 function.definition = self.parse_location(location)
                 header.functions << function
@@ -173,6 +166,7 @@ module FFIDB
         when 'const size_t', 'const wchar_t' then true    # <stddef.h> # FIXME: need a better solution
         when /^u?int\d+_t$/, /^u?int\d+_t \*$/ then true  # <stdint.h>
         when /^u?intptr_t$/ then true                     # <stdint.h>
+        when 'FILE' then true                             # <stdio.h>
         when 'ssize_t', 'off_t', 'off64_t' then true      # <sys/types.h>
         else false
       end
@@ -192,8 +186,20 @@ module FFIDB
     private
 
     ##
+    # @param  [String, #to_s] function_name
+    # @return [Boolean]
+    def consider_function?(function_name)
+      function_name = function_name.to_s
+      if not self.include_symbols.empty?
+        self.include_symbols[function_name]
+      else
+        !self.exclude_symbols[function_name]
+      end
+    end
+
+    ##
     # @param  [Pathname, #to_s] path
-    # @return [Pathname]
+    # @return [Boolean]
     def consider_path?(path)
       path = Pathname(path) unless path.is_a?(Pathname)
       path.expand_path.to_s.start_with?(base_directory.expand_path.to_s << '/')

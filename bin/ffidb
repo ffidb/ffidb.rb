@@ -202,7 +202,10 @@ class CLI < Thor
           parser.parse_macro! var_and_val
         end
         (config[:exclude] || []).each do |symbol|
-          parser.exclude_symbol! symbol
+          parser.exclude_symbols[symbol] = true
+        end
+        (config[:include] || []).each do |symbol|
+          parser.include_symbols[symbol] = true
         end
       end
 
