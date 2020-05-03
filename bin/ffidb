@@ -111,13 +111,15 @@ class CLI < Thor
   def init
     registry_path = FFIDB::Registry.default_path
     if registry_path.exist?
-      warn "#{$0}: The registry at #{registry_path} has already been initialized." if verbose?
+      error = "The registry at #{registry_path} has already been initialized."
+      warn "#{$0}: #{set_color(error, :yellow)}" if verbose?
       return
     end
     git_command = %Q(git clone --depth=1 #{FFIDB::Registry::GIT_HTTPS_URL} #{registry_path})
     system git_command # TODO: improve this
     if $?.exitstatus.nonzero?
-      warn "#{$0}: Failed to execute `#{git_command}`: exit code #{$?.exitstatus}."
+      error = "Failed to execute `#{git_command}`: exit code #{$?.exitstatus}."
+      warn "#{$0}: #{set_color(error, :red)}"
       exit $?.exitstatus
     end
     Dir.chdir registry_path
@@ -224,9 +226,9 @@ class CLI < Thor
         header = parser.parse_header(path) do |exception|
           case exception
             when FFIDB::ParseError
-              warn "#{$0}: #{exception}" unless quiet?
+              warn "#{$0}: #{set_color(exception.to_s, :red)}" unless quiet?
             when FFIDB::ParseWarning
-              warn "#{$0}: #{exception}" if verbose?
+              warn "#{$0}: #{set_color(exception.to_s, :yellow)}" if verbose?
             else raise exception
           end
         end
@@ -308,7 +310,8 @@ class CLI < Thor
     git_command = %Q(git pull)
     system git_command # TODO: improve this
     if $?.exitstatus.nonzero?
-      warn "#{$0}: Failed to execute `#{git_command}` in #{registry_path}: exit code #{$?.exitstatus}."
+      error = "Failed to execute `#{git_command}` in #{registry_path}: exit code #{$?.exitstatus}."
+      warn "#{$0}: #{set_color(error, :red)}"
       exit $?.exitstatus
     end
   rescue => error
