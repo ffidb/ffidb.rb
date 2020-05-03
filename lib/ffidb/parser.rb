@@ -121,7 +121,7 @@ module FFIDB
         :continue # visit the next sibling
       end
       function.parameters.freeze
-      function.instance_variable_set(:@debug, declaration.type.spelling.sub(/\s*\(/, " #{name}(")) if self.debug
+      function.instance_variable_set(:@debug, declaration.type.spelling.sub(/\s*\(/, " #{name}(")) if self.debug # TODO: __attribute__((noreturn))
       function
     end
 
@@ -141,18 +141,21 @@ module FFIDB
     # @return [Type]
     def parse_type(type)
       ostensible_type = type.spelling
+      ostensible_type.sub!(/\*const$/, '*') # remove private const qualifiers
       pointer_suffix = case ostensible_type
         when /(\s\*+)$/
           ostensible_type.delete_suffix!($1)
           $1
         else nil
       end
-      if self.preserve_type?(ostensible_type)
+      resolved_type = if self.preserve_type?(ostensible_type)
         ostensible_type << pointer_suffix if pointer_suffix
-        Type.new(ostensible_type)
+        ostensible_type
       else
-        Type.new(type.canonical.spelling)
+        type.canonical.spelling
       end
+      resolved_type.sub!(/\*const$/, '*') # remove private const qualifiers
+      Type.new(resolved_type)
     end
 
     ##
