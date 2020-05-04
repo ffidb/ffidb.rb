@@ -21,12 +21,13 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
+      @namespace = self.options[:module] || library.name
       puts
-      puts "namespace #{library.name} {"
+      puts "namespace #{@namespace} {"
     end
 
     def finish_library
-      puts "} // #{@library.name}"
+      puts "} // #{@namespace}"
     end
   end # Cpp
 end # FFIDB::Exporters

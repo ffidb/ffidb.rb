@@ -58,6 +58,7 @@ module FFIDB::Exporters
     def begin
       puts "; #{FFIDB.header}"
       puts
+      @package = self.options[:module] # TODO: use as package name
       puts "(asdf:load-system :cffi)"
     end
 

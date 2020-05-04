@@ -63,10 +63,11 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
+      @module = self.options[:module] || library.name.capitalize
       library_paths = self.dlopen_paths_for(library)
       puts
       puts <<~EOS
-      module #{library.name.capitalize}
+      module #{@module}
         extend FFI::Library
         ffi_lib [#{library_paths.map(&:inspect).join(', ')}]
       EOS
@@ -74,7 +75,7 @@ module FFIDB::Exporters
     end
 
     def finish_library
-      puts "end # #{@library.name.capitalize}"
+      puts "end # #{@module}"
     end
 
     def export_function(function)

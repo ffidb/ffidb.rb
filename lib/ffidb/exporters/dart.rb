@@ -104,7 +104,7 @@ module FFIDB::Exporters
       ffi_parameters = function.parameters.each_value.map { |p| ffi_type(p.type) }
       puts
       puts <<~EOS
-      final #{dart_type(function.type)} Function(#{dart_parameters.join(', ')}) #{function.name} = zlib
+      final #{dart_type(function.type)} Function(#{dart_parameters.join(', ')}) #{function.name} = #{@library.name}
           .lookup<ffi.NativeFunction<#{ffi_type(function.type)} Function(#{ffi_parameters.join(', ')})>>('#{function.name}')
           .asFunction();
       EOS

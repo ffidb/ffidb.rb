@@ -70,7 +70,7 @@ module FFIDB::Exporters
     end
 
     def begin_library(library)
-      @interface = library.name.capitalize
+      @interface = self.options[:module] || library.name.capitalize
       soname = self.dlopen_paths_for(library).first # FIXME
       puts
       puts <<~EOS
