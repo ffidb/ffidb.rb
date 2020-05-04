@@ -16,11 +16,15 @@ module FFIDB
   end
 
   ##
-  # An error indicating that opening a registry directory requires a newer
-  # version of FFIDB.rb than the current one.
-  class RegistryVersionMismatch < Error
+  # An error indicating that a problem with the registry.
+  class RegistryError < Error
     EXIT_CODE = Sysexits::EX_CONFIG
   end
+
+  ##
+  # An error indicating that opening a registry directory requires a newer
+  # version of FFIDB.rb than the current one.
+  class RegistryVersionMismatch < RegistryError; end
 
   ##
   # An error indicating that an FFI symbol was not found.

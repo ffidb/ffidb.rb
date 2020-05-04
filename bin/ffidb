@@ -66,6 +66,7 @@ class CLI < Thor
       FFIDB::Glob.new(exclude_pattern, ignore_case: false, match_substring: false)
     end
 
+    self.check_registry_exists!
     FFIDB::Registry.open do |registry|
       exports = []
       patterns.each do |pattern|
@@ -140,6 +141,7 @@ class CLI < Thor
       $ ffidb list lua
   EOS
   def list(library_name = nil) # FIXME
+    self.check_registry_exists!
     FFIDB::Registry.open do |registry|
       registry.each_library do |library|
         next if library_name && library_name != library.name
@@ -260,6 +262,7 @@ class CLI < Thor
   def search(pattern)
     matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: true)
     p self.options, matcher if debug?
+    self.check_registry_exists!
     FFIDB::Registry.open do |registry|
       registry.find_functions(matcher) do |function, library|
         puts "#{library.name}\t#{function.name}" # TODO: improve formatting
@@ -282,6 +285,7 @@ class CLI < Thor
   #option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT" # TODO
   def show(function)
     p self.options, function if debug?
+    self.check_registry_exists!
     FFIDB::Registry.open do |registry|
       found = registry.find_functions(function) do |function, library|
         puts function.to_yaml
@@ -306,8 +310,7 @@ class CLI < Thor
       $ cd $HOME/.ffidb && git pull
   EOS
   def update
-    registry_path = FFIDB::Registry.default_path
-    raise "Registry at #{registry_path} not initialized (run `#{$0} init` first?)" unless registry_path.exist?
+    registry_path = self.check_registry_exists!
     Dir.chdir registry_path
     git_command = %Q(git pull)
     system git_command # TODO: improve this
@@ -323,6 +326,12 @@ class CLI < Thor
   end
 
   private
+
+  def check_registry_exists!
+    registry_path = FFIDB::Registry.default_path
+    raise FFIDB::RegistryError, "Registry at #{registry_path} not initialized (run `#{$0} init` first?)" unless registry_path.exist?
+    registry_path
+  end
 
   def debug?() self.options[:debug] end
   def verbose?() self.options[:verbose] || self.debug? end
