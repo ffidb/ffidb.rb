@@ -56,8 +56,8 @@ module FFIDB::Exporters
     }
 
     def begin
-      puts "# #{FFIDB.header}"
-      puts
+      puts "# #{FFIDB.header}" if self.header?
+      puts if self.header?
       puts "require 'ffi'"
     end
 

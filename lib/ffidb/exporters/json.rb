@@ -9,6 +9,7 @@ module FFIDB::Exporters
   # Code generator for the JSON data interchange language.
   class JSON < FFIDB::Exporter
     def begin
+      # No header, because JSON doesn't support comments
       @json = {}
     end
 

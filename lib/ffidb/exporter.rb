@@ -35,6 +35,10 @@ module FFIDB
       self.options[:verbose] || self.debug?
     end
 
+    def header?
+      self.options[:header]
+    end
+
     def emit(&block)
       begin
         self.begin

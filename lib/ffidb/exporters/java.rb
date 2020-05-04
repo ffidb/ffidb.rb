@@ -57,8 +57,8 @@ module FFIDB::Exporters
     }
 
     def begin
-      puts "// #{FFIDB.header}"
-      puts
+      puts "// #{FFIDB.header}" if self.header?
+      puts if self.header?
       puts <<~EOS
       import com.sun.jna.Library;
       import com.sun.jna.Native;

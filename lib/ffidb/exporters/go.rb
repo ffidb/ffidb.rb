@@ -10,8 +10,8 @@ module FFIDB::Exporters
   # @see https://github.com/golang/go/wiki/cgo
   class Go < C
     def begin
-      puts "// #{FFIDB.header}"
-      puts
+      puts "// #{FFIDB.header}" if self.header?
+      puts if self.header?
       puts "/*"
       puts "#include <stdarg.h>    // for va_list"
       puts "#include <stdbool.h>   // for _Bool"

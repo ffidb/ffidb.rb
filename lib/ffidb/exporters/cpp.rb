@@ -10,8 +10,8 @@ module FFIDB::Exporters
     EXTERN_QUALIFIER = 'extern "C"'
 
     def begin
-      puts "// #{FFIDB.header}"
-      puts
+      puts "// #{FFIDB.header}" if self.header?
+      puts if self.header?
       puts "#include <cstdarg>     // for va_list"
       puts "#include <cstdbool>    // for bool" # not needed in C++
       puts "#include <cstddef>     // for size_t"
