@@ -89,7 +89,10 @@ module FFIDB::Exporters
     # @param  [FFIDB::Type] c_type
     # @return [Symbol]
     def rb_type(c_type)
-      TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
+      case
+        when c_type.enum? then :int
+        else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
+      end
     end
   end # Ruby
 end # FFIDB::Exporters

@@ -116,14 +116,20 @@ module FFIDB::Exporters
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def dart_type(c_type)
-      TYPE_MAP_DART[c_type.to_s] || self.ffi_type(c_type)
+      case
+        when c_type.enum? then :int
+        else TYPE_MAP_DART[c_type.to_s] || self.ffi_type(c_type)
+      end
     end
 
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def ffi_type(c_type)
-      ffi_type = TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
+      ffi_type = case
+        when c_type.enum? then :Int32
+        else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
+      end
       "ffi.#{ffi_type}"
     end
   end # Dart

@@ -58,6 +58,10 @@ RSpec.describe FFIDB::Type do
     end
   end
 
+  describe "#enum?" do
+    # TODO
+  end
+
   describe "#integer?" do
     it "returns true for standard signed-integer types" do
       expect(Type.new('char')).to be_integer

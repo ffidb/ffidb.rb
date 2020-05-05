@@ -34,6 +34,12 @@ module FFIDB
 
     ##
     # @return [Boolean]
+    def enum?
+      self.spec.start_with?('enum ')
+    end
+
+    ##
+    # @return [Boolean]
     def integer?
       case self.spec
         when 'char', 'short', 'int', 'long', 'long long' then true
