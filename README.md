@@ -1,6 +1,9 @@
 FFI DB Command-Line Interface (CLI)
 ===================================
 
+[![Project license](https://img.shields.io/badge/license-Public%20Domain-blue.svg)](https://unlicense.org)
+[![RubyGems gem version](https://img.shields.io/gem/v/ffidb.svg)](https://rubygems.org/gems/ffidb)
+
 Installation
 ------------
 
