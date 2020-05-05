@@ -77,7 +77,7 @@ module FFIDB::Exporters
       puts ")"
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map { |p| py_type(p.type) }
       puts
       puts <<~EOS

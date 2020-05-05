@@ -61,7 +61,7 @@ module FFIDB
 
     def begin_library(library) end
 
-    def export_function(function)
+    def export_function(function, disabled: nil)
       raise "not implemented" # subclasses must implement this
     end
 

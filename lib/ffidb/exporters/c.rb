@@ -24,7 +24,7 @@ module FFIDB::Exporters
       puts "// #{library.name} API"
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map do |p|
         p_type = if p.type.function_pointer?
           p.type.to_s.sub('(*)', "(*#{p.name})")

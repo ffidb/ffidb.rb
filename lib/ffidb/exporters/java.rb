@@ -83,7 +83,7 @@ module FFIDB::Exporters
       puts "} // #{@interface}"
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map { |p| "#{jna_type(p.type)} #{p.name}" }
       puts
       puts "  #{jna_type(function.type)} #{function.name}(#{parameters.join(', ')});"

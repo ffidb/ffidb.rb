@@ -18,7 +18,7 @@ module FFIDB::Exporters
       @json[@library.name] ||= {}
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       @json[@library.name][function.name] = function.to_h
     end
 

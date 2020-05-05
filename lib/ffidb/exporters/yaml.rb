@@ -11,7 +11,7 @@ module FFIDB::Exporters
       puts if self.header?
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       @counter ||= 0
       puts unless @counter.zero?
       puts function.to_yaml

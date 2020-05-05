@@ -78,9 +78,11 @@ module FFIDB::Exporters
       puts "end # #{@module}"
     end
 
-    def export_function(function)
+    def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map { |p| rb_type(p.type).inspect }
-      puts "  attach_function :#{function.name}, [#{parameters.join(', ')}], :#{rb_type(function.type)}"
+      print '  '
+      print '#' if kwargs[:disabled]
+      puts "attach_function :#{function.name}, [#{parameters.join(', ')}], :#{rb_type(function.type)}"
     end
 
     protected
