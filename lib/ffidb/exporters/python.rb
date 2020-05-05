@@ -80,7 +80,7 @@ module FFIDB::Exporters
     def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map { |p| py_type(p.type) }
       puts
-      puts <<~EOS
+      puts <<~EOS.lines.map { |line| kwargs[:disabled] ? line.prepend('#') : line }.join
       #{function.name} = #{@library.name}.#{function.name}
       #{function.name}.restype = #{py_type(function.type)}
       #{function.name}.argtypes = [#{parameters.join(', ')}]
