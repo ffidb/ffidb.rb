@@ -12,8 +12,31 @@ The tool can be installed quickly and easily on any computer that has
 
     $ gem install ffidb
 
-Reference
----------
+After installation, download and initialize the FFI DB registry as follows:
+
+    $ ffidb init
+
+Your local FFI DB registry is located at the path `$HOME/.ffidb/`.
+
+Examples (API)
+--------------
+
+### Loading the library
+
+    require 'ffidb'
+
+### Enumerating FFI functions
+
+    FFIDB::Registry.open do |registry|
+      registry.open_library(:zlib) do |library|
+        library.each_function do |function|
+          p function
+        end
+      end
+    end
+
+Reference (CLI)
+---------------
 
     Commands:
       ffidb export LIBRARY|SYMBOL...  # Generate C/C++/Go/Java/Python/Ruby/etc code
