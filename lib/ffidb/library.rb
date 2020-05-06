@@ -62,6 +62,7 @@ module FFIDB
       return self.to_enum(:each_type) unless block_given?
       types = {}
       self.each_function do |function|
+        types[function.type] ||= true
         function.parameters.each_value do |parameter|
           types[parameter.type] ||= true
         end

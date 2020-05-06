@@ -2,11 +2,18 @@
 
 module FFIDB
   class Type < Struct.new(:spec)
+    include Comparable
+
     ##
     # @param [String, #to_s] spec
     def initialize(spec)
       super(spec.to_s)
     end
+
+    ##
+    # @param  [Type] other
+    # @return [Integer]
+    def <=>(other) self.spec <=> other.spec end
 
     ##
     # @return [Boolean]
@@ -35,7 +42,13 @@ module FFIDB
     ##
     # @return [Boolean]
     def enum?
-      self.spec.start_with?('enum ')
+      !(self.pointer?) && self.spec.start_with?('enum ')
+    end
+
+    ##
+    # @return [Boolean]
+    def struct?
+      !(self.pointer?) && (self.spec.start_with?('struct ') || self.spec.start_with?('const struct '))
     end
 
     ##
@@ -105,6 +118,12 @@ module FFIDB
     # @return [Boolean]
     def array_pointer?
       self.spec.end_with?('[]')
+    end
+
+    ##
+    # @return [Boolean]
+    def enum_pointer?
+      self.pointer? && self.spec.start_with?('enum ')
     end
 
     ##
