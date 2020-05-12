@@ -26,10 +26,12 @@ module FFIDB::Exporters
 
     def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map do |p|
-        p_type = if p.type.function_pointer?
-          p.type.to_s.sub('(*)', "(*#{p.name})")
-        else
-          "#{p.type.to_s.gsub(' *', '*')} #{p.name}"
+        p_type = case
+          when p.type.function_pointer?
+            p.type.to_s.sub('(*)', "(*#{p.name})")
+          when self.options[:parameter_names] == false
+            p.type.to_s.gsub(' *', '*')
+          else "#{p.type.to_s.gsub(' *', '*')} #{p.name}"
         end
         p_type.gsub('const char *const[]', 'const char* const*') # FIXME
       end
@@ -46,7 +48,7 @@ module FFIDB::Exporters
         end
         print ')'
       end
-      puts ';'
+      puts (self.options[:semicolon] == false ? '' : ';')
     end
 
     private
