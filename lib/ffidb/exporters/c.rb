@@ -35,7 +35,7 @@ module FFIDB::Exporters
       end
       indent = self.class.const_get(:SYMBOL_INDENT)
       print ' ' * indent if indent && indent.nonzero?
-      print self.class.const_get(:EXTERN_QUALIFIER), ' '
+      print self.extern_qualifier, ' ' if self.extern_qualifier
       if function.type.function_pointer?
         print function.type.to_s.sub('(*)', "(*#{function.name}(#{parameters.join(', ')}))")
       else
@@ -47,6 +47,12 @@ module FFIDB::Exporters
         print ')'
       end
       puts ';'
+    end
+
+    private
+
+    def extern_qualifier
+      self.class.const_get(:EXTERN_QUALIFIER)
     end
   end # C
 end # FFIDB::Exporters
