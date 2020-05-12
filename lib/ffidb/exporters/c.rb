@@ -29,9 +29,9 @@ module FFIDB::Exporters
         p_type = if p.type.function_pointer?
           p.type.to_s.sub('(*)', "(*#{p.name})")
         else
-          "#{p.type} #{p.name}"
+          "#{p.type.to_s.gsub(' *', '*')} #{p.name}"
         end
-        p_type.gsub('const char *const[]', 'const char * const *') # FIXME
+        p_type.gsub('const char *const[]', 'const char* const*') # FIXME
       end
       indent = self.class.const_get(:SYMBOL_INDENT)
       print ' ' * indent if indent && indent.nonzero?
