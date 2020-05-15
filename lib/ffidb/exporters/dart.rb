@@ -11,6 +11,7 @@ module FFIDB::Exporters
   # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
   class Dart < FFIDB::Exporter
     # @see https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
+    # @see https://github.com/dart-lang/sdk/issues/36140
     TYPE_MAP_FFI = {
       'void'               => :Void,
       # standard signed-integer types:
@@ -30,10 +31,10 @@ module FFIDB::Exporters
       'double'             => :Double,
       'long double'        => nil, # not supported
       # standard character-sequence types:
-      'char *'             => 'Pointer<ffi.Int8>', # TODO: Utf8
-      'const char *'       => 'Pointer<ffi.Int8>', # TODO: Utf8
+      'char *'             => 'Pointer<Int8>', # TODO: Utf8
+      'const char *'       => 'Pointer<Int8>', # TODO: Utf8
       # <stdarg.h>
-      'va_list'            => 'Pointer<ffi.Void>',
+      'va_list'            => 'Pointer<Void>',
       # <stdbool.h>
       '_Bool'              => :Int8,   # TODO
       # <stddef.h>
@@ -54,38 +55,32 @@ module FFIDB::Exporters
       'ssize_t'            => :Int64,  # TODO
       'off_t'              => :Uint64, # TODO
       # all other types:
-      nil                  => 'Pointer<ffi.Void>',
+      nil                  => 'Pointer<Void>',
     }
 
     # @see https://dart.dev/guides/language/language-tour
     TYPE_MAP_DART = {
-      'void'               => :void,
-      # standard signed-integer types:
-      'char'               => :int,
-      'short'              => :int,
-      'int'                => :int,
-      'long'               => :int,
-      'long long'          => :int,
-      # standard unsigned-integer types:
-      'unsigned char'      => :int,
-      'unsigned short'     => :int,
-      'unsigned int'       => :int,
-      'unsigned long'      => :int,
-      'unsigned long long' => :int,
-      # standard floating-point types:
-      'float'              => :double,
-      'double'             => :double,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # all other types:
-      nil                  => nil,
+      :Void                => :void,
+      :Int8                => :int,
+      :Int16               => :int,
+      :Int32               => :int,
+      :Int64               => :int,
+      :Uint8               => :int,
+      :Uint16              => :int,
+      :Uint32              => :int,
+      :Uint64              => :int,
+      :Float               => :double,
+      :Double              => :double,
+      :IntPtr              => :int,
+      'Pointer<Int8>'      => 'Pointer<Int8>',
+      nil                  => 'Pointer<Void>',
     }
 
     def begin
       puts "// #{FFIDB.header}" if self.header?
       puts if self.header?
       puts <<~EOS
-      import 'dart:ffi' as ffi;
+      import 'dart:ffi';
       import 'dart:io' as io;
       EOS
     end
@@ -95,7 +90,7 @@ module FFIDB::Exporters
       soname = self.dlopen_paths_for(library).first # FIXME
       puts
       puts <<~EOS
-      final #{@library.name} = ffi.DynamicLibrary.open('#{soname}');
+      final #{@library.name} = DynamicLibrary.open('#{soname}');
       EOS
     end
 
@@ -105,7 +100,7 @@ module FFIDB::Exporters
       puts
       puts <<~EOS
       final #{dart_type(function.type)} Function(#{dart_parameters.join(', ')}) #{function.name} = #{@library.name}
-          .lookup<ffi.NativeFunction<#{ffi_type(function.type)} Function(#{ffi_parameters.join(', ')})>>('#{function.name}')
+          .lookup<NativeFunction<#{ffi_type(function.type)} Function(#{ffi_parameters.join(', ')})>>('#{function.name}')
           .asFunction();
       EOS
     end
@@ -116,21 +111,17 @@ module FFIDB::Exporters
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def dart_type(c_type)
-      case
-        when c_type.enum? then :int
-        else TYPE_MAP_DART[c_type.to_s] || self.ffi_type(c_type)
-      end
+      TYPE_MAP_DART[self.ffi_type(c_type)] || TYPE_MAP_DART[nil]
     end
 
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
     def ffi_type(c_type)
-      ffi_type = case
+      case
         when c_type.enum? then :Int32
         else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
       end
-      "ffi.#{ffi_type}"
     end
   end # Dart
 end # FFIDB::Exporters
