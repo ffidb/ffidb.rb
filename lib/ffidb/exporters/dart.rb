@@ -76,46 +76,13 @@ module FFIDB::Exporters
       nil                  => 'Pointer<Void>',
     }
 
-    def begin
-      puts "// #{FFIDB.header}" if self.header?
-      puts if self.header?
-      puts <<~EOS
-      import 'dart:ffi';
-      import 'dart:io' as io;
-      EOS
-    end
-
     def begin_library(library)
       @library = library
-      soname = self.dlopen_paths_for(library).first # FIXME
-      puts
-      puts <<~EOS
-      final #{@library.name} = DynamicLibrary.open('#{soname}');
-      EOS
+      @soname = self.dlopen_paths_for(library).first # FIXME
     end
 
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      puts
-      puts "class #{struct.name} extends Struct {}" # TODO
-    end
-
-    def export_function(function, **kwargs)
-      dart_parameters = function.parameters.each_value.map { |p| dart_type(p.type) }
-      ffi_parameters = function.parameters.each_value.map { |p| ffi_type(p.type) }
-      puts
-      puts <<~EOS
-      final #{dart_type(function.type)} Function(#{dart_parameters.join(', ')}) #{function.name} = #{@library.name}
-          .lookup<NativeFunction<#{ffi_type(function.type)} Function(#{ffi_parameters.join(', ')})>>('#{function.name}')
-          .asFunction();
-      EOS
+    def finish
+      puts self.render_template('dart.erb')
     end
 
     protected

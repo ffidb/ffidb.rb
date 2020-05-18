@@ -61,7 +61,7 @@ module FFIDB::Exporters
       @library_paths = self.dlopen_paths_for(library)
     end
 
-    def finish_library
+    def finish
       puts self.render_template('ruby.erb')
     end
 

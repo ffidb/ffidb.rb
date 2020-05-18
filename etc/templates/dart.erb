@@ -1,0 +1,41 @@
+<% if header? %>
+// <%= FFIDB.header %>
+
+<% end %>
+import 'dart:ffi';
+import 'dart:io' as io;
+
+final <%= @library.name %> = DynamicLibrary.open('<%= @soname %>');
+<% for enum in @enums || [] %>
+
+<% if enum.comment %>
+/// <%= enum.comment %>
+<% end %>
+abstract class <%= enum.name %> {
+  <%= enum.name %>._();
+
+  <% for name, value in enum.values || {} %>
+  static const <%= name %> = <%= value %>;
+  <% end %>
+}
+<% end %>
+<% for struct in @structs || [] %>
+
+<% if struct.comment %>
+/// <%= struct.comment %>
+<% end %>
+class <%= struct.name %> extends Struct {}
+<% end %>
+<% for function in @functions || [] %>
+
+<% if function.comment %>
+/// <%= function.comment %>
+<% end %>
+final <%= dart_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| dart_type(p.type) }.join(', ')
+    %>) <%= function.name %> = <%= @library.name %>
+    .lookup<NativeFunction<<%= ffi_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| ffi_type(p.type) }.join(', ')
+    %>)>>('<%= function.name %>')
+    .asFunction();
+<% end %>

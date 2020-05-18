@@ -59,7 +59,7 @@ module FFIDB::Exporters
       @library = library
     end
 
-    def finish_library
+    def finish
       puts self.render_template('python.erb')
     end
 
