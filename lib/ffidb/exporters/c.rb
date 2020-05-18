@@ -29,11 +29,13 @@ module FFIDB::Exporters
     end
 
     def export_enum(enum, **kwargs)
-      # TODO
+      print ' '*self.symbol_indent if self.symbol_indent.nonzero?
+      puts "enum #{enum.name} {}" # TODO
     end
 
     def export_struct(struct, **kwargs)
-      # TODO
+      print ' '*self.symbol_indent if self.symbol_indent.nonzero?
+      puts "struct #{struct.name} {}" # TODO
     end
 
     def export_function(function, **kwargs)
@@ -47,8 +49,7 @@ module FFIDB::Exporters
         end
         p_type.gsub('const char *const[]', 'const char* const*') # FIXME
       end
-      indent = self.class.const_get(:SYMBOL_INDENT)
-      print ' ' * indent if indent && indent.nonzero?
+      print ' '*self.symbol_indent if self.symbol_indent.nonzero?
       print self.extern_qualifier, ' ' if self.extern_qualifier
       if function.type.function_pointer?
         print function.type.to_s.sub('(*)', "(*#{function.name}(#{parameters.join(', ')}))")
@@ -64,6 +65,10 @@ module FFIDB::Exporters
     end
 
     private
+
+    def symbol_indent
+      self.class.const_get(:SYMBOL_INDENT)
+    end
 
     def extern_qualifier
       self.class.const_get(:EXTERN_QUALIFIER)

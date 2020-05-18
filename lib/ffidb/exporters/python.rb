@@ -86,7 +86,10 @@ module FFIDB::Exporters
     end
 
     def export_struct(struct, **kwargs)
-      # TODO
+      puts
+      puts "class #{struct.name}(Structure):"
+      print ' '*4
+      puts 'pass' # TODO
     end
 
     def export_function(function, **kwargs)

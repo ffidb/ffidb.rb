@@ -79,11 +79,13 @@ module FFIDB::Exporters
     end
 
     def export_enum(enum, **kwargs)
-      # TODO
+      puts
+      puts "(cffi:defcenum #{enum.name})" # TODO
     end
 
     def export_struct(struct, **kwargs)
-      # TODO
+      puts
+      puts "(cffi:defcstruct #{struct.name})" # TODO
     end
 
     def export_function(function, **kwargs)

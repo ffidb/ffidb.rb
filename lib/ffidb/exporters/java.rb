@@ -92,7 +92,8 @@ module FFIDB::Exporters
     end
 
     def export_struct(struct, **kwargs)
-      # TODO
+      puts
+      puts "  public static class #{struct.name} extends Structure {}" # TODO
     end
 
     def export_function(function, **kwargs)

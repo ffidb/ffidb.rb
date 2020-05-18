@@ -71,7 +71,6 @@ module FFIDB::Exporters
         extend FFI::Library
         ffi_lib [#{library_paths.map(&:inspect).join(', ')}]
       EOS
-      puts
     end
 
     def finish_library
@@ -87,10 +86,16 @@ module FFIDB::Exporters
     end
 
     def export_struct(struct, **kwargs)
+      puts
+      print ' '*2
+      puts "class #{struct.name} < FFI::Struct"
       # TODO
+      print ' '*2
+      puts 'end'
     end
 
     def export_function(function, **kwargs)
+      puts
       parameters = function.parameters.each_value.map { |p| rb_type(p.type).inspect }
       print '  '
       print '#' if kwargs[:disabled]
