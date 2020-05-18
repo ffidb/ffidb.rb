@@ -1,0 +1,31 @@
+<% if header? %>
+# <%= FFIDB.header %>
+
+<% end %>
+import ctypes, ctypes.util
+
+<%= @library.name %> = ctypes.CDLL(
+<% self.dlopen_paths_for(@library).each_with_index do |library_path, i| %>
+    <%= i.nonzero? ? 'or ' : '' %>ctypes.util.find_library("<%= library_path %>")
+<% end %>
+<% unless options[:library_path] %>
+    or "<%= @library.dlopen.first %>"
+<% end %>
+)
+<% for enum in @enums %>
+
+<%= enum.name %> = ctypes.c_int
+<% end %>
+<% for struct in @structs %>
+
+class <%= struct.name %>(Structure):
+    pass
+<% end %>
+<% for function in @functions %>
+
+<%= function.name %> = <%= @library.name %>.<%= function.name %>
+<%= function.name %>.restype = <%= py_type(function.type) %>
+<%= function.name %>.argtypes = [<%=
+  function.parameters.each_value.map { |p| py_type(p.type) }.join(', ')
+%>]
+<% end %>

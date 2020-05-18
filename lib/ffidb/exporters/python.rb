@@ -55,51 +55,12 @@ module FFIDB::Exporters
       nil                  => :void_p,
     }
 
-    def begin
-      puts "# #{FFIDB.header}" if self.header?
-      puts if self.header?
-      puts "import ctypes, ctypes.util"
-    end
-
     def begin_library(library)
       @library = library
-      puts
-      print library.name, ' = ctypes.CDLL('
-      puts
-      self.dlopen_paths_for(library).each_with_index do |library_path, i|
-        print '    '
-        print 'or ' unless i.zero?
-        print 'ctypes.util.find_library("', library_path, '")'
-        puts
-      end
-      print '    or "', library.dlopen.first, '"' unless self.options[:library_path] # TODO
-      puts unless self.options[:library_path]
-      puts ")"
     end
 
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      puts
-      puts "class #{struct.name}(Structure):"
-      print ' '*4
-      puts 'pass' # TODO
-    end
-
-    def export_function(function, **kwargs)
-      parameters = function.parameters.each_value.map { |p| py_type(p.type) }
-      puts
-      puts <<~EOS.lines.map { |line| kwargs[:disabled] ? line.prepend('#') : line }.join
-      #{function.name} = #{@library.name}.#{function.name}
-      #{function.name}.restype = #{py_type(function.type)}
-      #{function.name}.argtypes = [#{parameters.join(', ')}]
-      EOS
+    def finish_library
+      puts self.render_template('python.erb')
     end
 
     protected
