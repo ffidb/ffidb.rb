@@ -65,14 +65,16 @@ module FFIDB
 
     ##
     # @param  [Glob, #===] matcher
+    # @param  [Symbol] kind
     # @yield  [function]
     # @yield  [library]
     # @return [Enumerator]
-    def find_symbols(matcher, &block)
+    def find_symbols(matcher, kind: nil, &block)
       return self.to_enum(:find_symbols) unless block_given?
       count = 0
       self.each_library do |library|
         library.each_symbol do |symbol|
+          next if kind && kind != symbol.kind
           if matcher === symbol.name.to_s
             count += 1
             yield symbol, library

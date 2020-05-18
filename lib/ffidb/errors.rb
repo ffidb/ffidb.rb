@@ -31,8 +31,8 @@ module FFIDB
   class SymbolNotFound < Error
     EXIT_CODE = Sysexits::EX_NOINPUT
 
-    def initialize(symbol_type, symbol_name)
-      super("#{symbol_type.to_s.capitalize} not found: #{symbol_name}")
+    def initialize(symbol_kind, symbol_name)
+      super("#{symbol_kind.to_s.capitalize} not found: #{symbol_name}")
     end
   end
 
