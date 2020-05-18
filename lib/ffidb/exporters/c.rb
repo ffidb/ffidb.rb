@@ -24,6 +24,18 @@ module FFIDB::Exporters
       puts "// #{library.name} API"
     end
 
+    def export_typedef(typedef, **kwargs)
+      # TODO
+    end
+
+    def export_enum(enum, **kwargs)
+      # TODO
+    end
+
+    def export_struct(struct, **kwargs)
+      # TODO
+    end
+
     def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map do |p|
         p_type = case

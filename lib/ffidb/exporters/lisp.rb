@@ -74,6 +74,18 @@ module FFIDB::Exporters
       EOS
     end
 
+    def export_typedef(typedef, **kwargs)
+      # TODO
+    end
+
+    def export_enum(enum, **kwargs)
+      # TODO
+    end
+
+    def export_struct(struct, **kwargs)
+      # TODO
+    end
+
     def export_function(function, **kwargs)
       parameters = function.parameters.each_value.map { |p| "(#{p.name} :#{cffi_type(p.type)})" }
       delimiter = parameters.empty? ? '' : ' '

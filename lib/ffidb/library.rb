@@ -72,6 +72,7 @@ module FFIDB
 
     ##
     # @yield  [typedef]
+    # @yieldparam [symbol] Symbolic
     # @return [Enumerator]
     def each_typedef(&block)
       return self.to_enum(:each_typedef) unless block_given?
@@ -80,6 +81,7 @@ module FFIDB
 
     ##
     # @yield  [enum]
+    # @yieldparam [enum] Enum
     # @return [Enumerator]
     def each_enum(&block)
       return self.to_enum(:each_enum) unless block_given?
@@ -88,6 +90,7 @@ module FFIDB
 
     ##
     # @yield  [struct]
+    # @yieldparam [struct] Struct
     # @return [Enumerator]
     def each_struct(&block)
       return self.to_enum(:each_struct) unless block_given?
@@ -96,6 +99,7 @@ module FFIDB
 
     ##
     # @yield  [function]
+    # @yieldparam [function] Function
     # @return [Enumerator]
     def each_function(&block)
       return self.to_enum(:each_function) unless block_given?
@@ -103,7 +107,8 @@ module FFIDB
     end
 
     ##
-    # @yield  [Object]
+    # @yield  [symbol]
+    # @yieldparam [symbol] Symbolic
     # @return [Enumerator]
     def each_symbol(&block)
       return self.to_enum(:each_symbol) unless block_given?

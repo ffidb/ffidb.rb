@@ -14,6 +14,17 @@ module FFIDB
     end
 
     ##
+    # @return [Integer]
+    def kind_weight
+      case
+        when self.typedef? then 0
+        when self.enum? then 1
+        when self.struct? then 2
+        when self.function? then 3
+      end
+    end
+
+    ##
     # @return [Boolean]
     def typedef?() return false end
 

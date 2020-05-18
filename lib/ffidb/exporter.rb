@@ -61,6 +61,22 @@ module FFIDB
 
     def begin_library(library) end
 
+    def export_symbol(symbol, disabled: nil)
+      self.__send__("export_#{symbol.kind}", symbol, disabled: disabled)
+    end
+
+    def export_typedef(typedef, disabled: nil)
+      raise "not implemented" # subclasses must implement this
+    end
+
+    def export_enum(enum, disabled: nil)
+      raise "not implemented" # subclasses must implement this
+    end
+
+    def export_struct(struct, disabled: nil)
+      raise "not implemented" # subclasses must implement this
+    end
+
     def export_function(function, disabled: nil)
       raise "not implemented" # subclasses must implement this
     end

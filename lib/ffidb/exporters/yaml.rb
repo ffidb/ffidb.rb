@@ -11,11 +11,15 @@ module FFIDB::Exporters
       puts if self.header?
     end
 
-    def export_function(function, **kwargs)
+    def export_symbol(symbol, **kwargs)
       @counter ||= 0
       puts unless @counter.zero?
-      puts function.to_yaml
+      puts symbol.to_yaml
       @counter += 1
     end
+    alias_method :export_typedef, :export_symbol
+    alias_method :export_enum, :export_symbol
+    alias_method :export_struct, :export_symbol
+    alias_method :export_function, :export_symbol
   end # YAML
 end # FFIDB::Exporters

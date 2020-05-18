@@ -43,6 +43,7 @@ class CLI < Thor
       $ ffidb export lua -f=ruby     # Export Lua bindings as Ruby FFI code
   EOS
   option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT (for example: java)"
+  option :type, aliases: '-t', default: nil, desc: "Specify the symbol TYPE (enum/struct/function)"
   option :header, type: :boolean, default: true, desc: "Output the file header, or not"
   option :module, aliases: '-M', default: nil, desc: "Provide name for the top-level module or namespace"
   option :library_path, aliases: '-L', banner: 'DIRECTORY', desc: "Load all libraries from DIRECTORY"
@@ -52,6 +53,7 @@ class CLI < Thor
   option :disable_from, repeatable: true, banner: 'FILE', desc: "Read disable patterns from FILE"
   def export(pattern, *patterns)
     patterns.prepend(pattern)
+    symbol_kind = self.options[:type] ? self.options[:type].to_sym : nil
 
     format = (self.options[:format] || 'yaml').to_sym
 
@@ -89,28 +91,28 @@ class CLI < Thor
       patterns.each do |pattern|
         if library = registry.open_library(pattern)
           library.each_symbol do |symbol|
-            next unless symbol.function? # TODO
-            exports << [library, symbol] unless excludes.any? { |x| x === symbol.name }
+            next if symbol_kind && symbol_kind != symbol.kind
+            exports << [library, symbol.kind_weight, symbol] unless excludes.any? { |x| x === symbol.name }
           end
         else
           matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: false)
           registry.find_symbols(matcher) do |symbol, library|
-            next unless symbol.function? # TODO
-            exports << [library, symbol] unless excludes.any? { |x| x === symbol.name }
+            next if symbol_kind && symbol_kind != symbol.kind
+            exports << [library, symbol.kind_weight, symbol] unless excludes.any? { |x| x === symbol.name }
           end
         end
       end
 
       FFIDB::Exporter.for(format).new(**options).emit do |export|
         prev_library = nil
-        exports.sort!.uniq.each do |library, function|
+        exports.sort!.uniq.each do |library, _, symbol|
           if library != prev_library
             export.finish_library if prev_library
             export.begin_library(library)
             prev_library = library
           end
-          disabled = disables.any? { |pattern| pattern === function.name }
-          export.export_function(function, disabled: disabled)
+          disabled = disables.any? { |pattern| pattern === symbol.name }
+          export.export_symbol(symbol, disabled: disabled)
         end
         export.finish_library if prev_library
       end

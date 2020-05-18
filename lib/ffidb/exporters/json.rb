@@ -18,9 +18,13 @@ module FFIDB::Exporters
       @json[@library.name] ||= {}
     end
 
-    def export_function(function, **kwargs)
-      @json[@library.name][function.name] = function.to_h
+    def export_symbol(symbol, **kwargs)
+      @json[@library.name][symbol.name] = {kind: symbol.kind.to_s}.merge!(symbol.to_h)
     end
+    alias_method :export_typedef, :export_symbol
+    alias_method :export_enum, :export_symbol
+    alias_method :export_struct, :export_symbol
+    alias_method :export_function, :export_symbol
 
     def finish_library
       @library = nil
