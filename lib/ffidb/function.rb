@@ -1,12 +1,14 @@
 # This is free and unencumbered software released into the public domain.
 
 require_relative 'location'
+require_relative 'symbolic'
 
 require 'pathname'
 require 'yaml'
 
 module FFIDB
   class Function < ::Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
+    include Symbolic
     include Comparable
 
     alias_method :result_type, :type
@@ -16,6 +18,10 @@ module FFIDB
     # @param  [Function] other
     # @return [Integer]
     def <=>(other) self.name <=> other.name end
+
+    ##
+    # @return [Boolean]
+    def function?() return true end
 
     ##
     # @return [Boolean]

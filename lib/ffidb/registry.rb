@@ -68,14 +68,14 @@ module FFIDB
     # @yield  [function]
     # @yield  [library]
     # @return [Enumerator]
-    def find_functions(matcher, &block)
-      return self.to_enum(:find_functions) unless block_given?
+    def find_symbols(matcher, &block)
+      return self.to_enum(:find_symbols) unless block_given?
       count = 0
       self.each_library do |library|
-        library.each_function do |function|
-          if matcher === function.name
+        library.each_symbol do |symbol|
+          if matcher === symbol.name.to_s
             count += 1
-            yield function, library
+            yield symbol, library
           end
         end
       end

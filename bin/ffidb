@@ -88,13 +88,15 @@ class CLI < Thor
       exports = []
       patterns.each do |pattern|
         if library = registry.open_library(pattern)
-          library.each_function do |function|
-            exports << [library, function] unless excludes.any? { |x| x === function.name }
+          library.each_symbol do |symbol|
+            next unless symbol.function? # TODO
+            exports << [library, symbol] unless excludes.any? { |x| x === symbol.name }
           end
         else
           matcher = FFIDB::Glob.new(pattern, ignore_case: true, match_substring: false)
-          registry.find_functions(matcher) do |function, library|
-            exports << [library, function] unless excludes.any? { |x| x === function.name }
+          registry.find_symbols(matcher) do |symbol, library|
+            next unless symbol.function? # TODO
+            exports << [library, symbol] unless excludes.any? { |x| x === symbol.name }
           end
         end
       end
@@ -164,12 +166,22 @@ class CLI < Thor
       registry.each_library do |library|
         next if library_name && library_name != library.name
         p library if debug?
-        library.each_function do |function|
-          p function if debug?
+        library.each_symbol do |symbol|
+          p symbol if debug?
           print "#{library.name}"
           print verbose? ? "@#{library.version}" : '' # TODO: resolve stable symlinks
-          print "\t#{function.name}"
-          puts verbose? ? "\t\t// #{function.definition.to_s}" : '' # TODO: improve formatting
+          print "\t#{symbol.name}"
+          if verbose?
+            type = case
+              when symbol.typedef? then :typedef
+              when symbol.enum? then :enum
+              when symbol.struct? then :struct
+              when symbol.function? then :function
+            end
+            print "\t#{type}"
+            print "\t\t// #{symbol.definition.to_s}" if symbol.function?
+          end
+          puts
         end
       end
     end
@@ -282,8 +294,8 @@ class CLI < Thor
     p self.options, matcher if debug?
     self.check_registry_exists!
     FFIDB::Registry.open do |registry|
-      registry.find_functions(matcher) do |function, library|
-        puts "#{library.name}\t#{function.name}" # TODO: improve formatting
+      registry.find_symbols(matcher) do |symbol, library|
+        puts "#{library.name}\t#{symbol.name}" # TODO: improve formatting
       end
     end
   rescue => error
@@ -301,15 +313,15 @@ class CLI < Thor
       $ ffidb show lua_callk
   EOS
   #option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT" # TODO
-  def show(function)
-    p self.options, function if debug?
+  def show(symbol_name)
+    p self.options, symbol_name if debug?
     self.check_registry_exists!
     FFIDB::Registry.open do |registry|
-      found = registry.find_functions(function) do |function, library|
-        puts function.to_yaml
+      found = registry.find_symbols(symbol_name) do |symbol, library|
+        puts symbol.to_yaml
         puts
       end
-      raise FFIDB::FunctionNotFound.new(function) unless found
+      raise FFIDB::SymbolNotFound.new(:symbol, symbol_name) unless found
     end
   rescue => error
     raise error if debug?

@@ -1,15 +1,23 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'symbolic'
+
 module FFIDB
-  class Enum < ::Struct.new(:name, :comment)
+  class Enum < ::Struct.new(:name, :values, :comment)
+    include Symbolic
     include Comparable
 
     ##
     # @param  [Symbol, #to_sym] name
+    # @param  [Map<String, Integer>] values
     # @param  [String, #to_s] comment
-    def initialize(name, comment: nil)
-      super(name.to_sym, comment ? comment.to_s : nil)
+    def initialize(name, values = {}, comment = nil)
+      super(name.to_sym, values, comment ? comment.to_s : nil)
     end
+
+    ##
+    # @return [Boolean]
+    def enum?() return true end
 
     ##
     # @param  [Parameter] other

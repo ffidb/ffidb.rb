@@ -71,16 +71,54 @@ module FFIDB
     end
 
     ##
+    # @yield  [typedef]
+    # @return [Enumerator]
+    def each_typedef(&block)
+      return self.to_enum(:each_typedef) unless block_given?
+      self.each_symbol.filter { |symbol| symbol.typedef? }.each(&block)
+    end
+
+    ##
+    # @yield  [enum]
+    # @return [Enumerator]
+    def each_enum(&block)
+      return self.to_enum(:each_enum) unless block_given?
+      self.each_symbol.filter { |symbol| symbol.enum? }.each(&block)
+    end
+
+    ##
+    # @yield  [struct]
+    # @return [Enumerator]
+    def each_struct(&block)
+      return self.to_enum(:each_struct) unless block_given?
+      self.each_symbol.filter { |symbol| symbol.struct? }.each(&block)
+    end
+
+    ##
     # @yield  [function]
     # @return [Enumerator]
     def each_function(&block)
       return self.to_enum(:each_function) unless block_given?
+      self.each_symbol.filter { |symbol| symbol.function? }.each(&block)
+    end
+
+    ##
+    # @yield  [Object]
+    # @return [Enumerator]
+    def each_symbol(&block)
+      return self.to_enum(:each_symbol) unless block_given?
       self.path.join(self.version).glob('*.yaml') do |path|
         path.open do |file|
           Psych.parse_stream(file) do |yaml_doc|
+            yaml = yaml_doc.to_ruby.transform_keys!(&:to_sym)
             case yaml_doc.children.first.tag.to_sym
+              when :'!typedef'
+                # TODO: support typedefs
+              when :'!enum'
+                yield Enum.new(yaml[:name], {}, yaml[:comment])
+              when :'!struct'
+                yield Struct.new(yaml[:name], {}, yaml[:comment])
               when :'!function'
-                yaml = yaml_doc.to_ruby.transform_keys!(&:to_sym)
                 parameters = (yaml[:parameters] || {}).inject({}) do |ps, (k, v)|
                   k = k.to_sym
                   ps[k] = Parameter.new(k, Type.new(v))
