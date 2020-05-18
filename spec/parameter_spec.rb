@@ -18,10 +18,10 @@ RSpec.describe FFIDB::Parameter do
   end
 
   describe "#eql?" do
-    a_int  = Parameter.new('a', 'int')
-    a_long = Parameter.new('a', 'long')
-    b_int  = Parameter.new('b', 'int')
-    b_long = Parameter.new('b', 'long')
+    a_int  = Parameter.new('a', Type.new('int'))
+    a_long = Parameter.new('a', Type.new('long'))
+    b_int  = Parameter.new('b', Type.new('int'))
+    b_long = Parameter.new('b', Type.new('long'))
 
     it "returns true when all attributes are equal" do
       expect(a_int).to eql(a_int.dup)

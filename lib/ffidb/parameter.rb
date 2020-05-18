@@ -7,8 +7,8 @@ module FFIDB
     ##
     # @param  [Symbol, #to_sym] name
     # @param  [Type] type
-    def initialize(name, type)
-      raise ArgumentError, "Expected FFIDB::Type, got #{type.inspect}" unless type.is_a?(Type)
+    def initialize(name, type = nil)
+      raise ArgumentError, "Expected FFIDB::Type, got #{type.inspect}" if type && !type.is_a?(Type)
       super(name.to_sym, type)
     end
 
