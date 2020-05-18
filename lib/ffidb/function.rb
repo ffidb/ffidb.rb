@@ -9,15 +9,9 @@ require 'yaml'
 module FFIDB
   class Function < ::Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
     include Symbolic
-    include Comparable
 
     alias_method :result_type, :type
     alias_method :return_type, :type
-
-    ##
-    # @param  [Function] other
-    # @return [Integer]
-    def <=>(other) self.name <=> other.name end
 
     ##
     # @return [Boolean]
@@ -70,7 +64,7 @@ module FFIDB
       h.delete(:parameters) if h[:parameters].empty?
       h.transform_keys!(&:to_s)
       h.transform_values! { |v| v.is_a?(Hash) ? v.transform_keys!(&:to_s) : v }
-      YAML.dump(h).gsub!("---\n", "--- !function\n")
+      YAML.dump(h).gsub!("---\n", "--- !#{self.kind}\n")
     end
   end # Function
 end # FFIDB

@@ -3,25 +3,25 @@
 require_relative 'symbolic'
 
 module FFIDB
-  class Enum < ::Struct.new(:name, :values, :comment)
+  class Union < ::Struct.new(:name, :fields, :comment)
     include Symbolic
 
     ##
     # @param  [Symbol, #to_sym] name
-    # @param  [Map<String, Integer>] values
+    # @param  [Map<Symbol, Type>] fields
     # @param  [String, #to_s] comment
-    def initialize(name, values = {}, comment = nil)
-      super(name.to_sym, values || {}, comment&.to_s)
+    def initialize(name, fields = {}, comment = nil)
+      super(name.to_sym, fields || {}, comment&.to_s)
     end
 
     ##
     # @return [Boolean]
-    def enum?() return true end
+    def union?() return true end
 
     ##
     # @return [String]
     def to_s
-      "enum #{self.name}"
+      "union #{self.name}"
     end
 
     ##
@@ -30,8 +30,8 @@ module FFIDB
       {
         name: self.name.to_s,
         comment: self.comment,
-        values: self.values,
+        fields: self.fields,
       }.delete_if { |k, v| v.nil? }
     end
-  end # Enum
+  end # Union
 end # FFIDB

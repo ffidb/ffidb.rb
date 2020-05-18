@@ -5,6 +5,14 @@ module FFIDB
     include Comparable
 
     ##
+    # @param  [String, #to_s] spec
+    # @return [Type]
+    def self.for(type_spec)
+      return type_spec if type_spec.is_a?(Type)
+      self.new(type_spec)
+    end
+
+    ##
     # @param [String, #to_s] spec
     def initialize(spec)
       super(spec.to_s)

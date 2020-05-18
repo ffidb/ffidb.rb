@@ -155,7 +155,7 @@ module FFIDB
         type.canonical.spelling
       end
       resolved_type.sub!(/\*const$/, '*') # remove private const qualifiers
-      Type.new(resolved_type)
+      Type.for(resolved_type)
     end
 
     ##

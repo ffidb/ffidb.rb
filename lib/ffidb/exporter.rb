@@ -80,6 +80,10 @@ module FFIDB
       (@structs ||= []) << struct
     end
 
+    def export_union(union, disabled: nil)
+      (@unions ||= []) << union
+    end
+
     def export_function(function, disabled: nil)
       (@functions ||= []) << function
     end

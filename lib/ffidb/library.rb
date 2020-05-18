@@ -98,6 +98,15 @@ module FFIDB
     end
 
     ##
+    # @yield  [union]
+    # @yieldparam [union] Union
+    # @return [Enumerator]
+    def each_union(&block)
+      return self.to_enum(:each_union) unless block_given?
+      self.each_symbol.filter { |symbol| symbol.union? }.each(&block)
+    end
+
+    ##
     # @yield  [function]
     # @yieldparam [function] Function
     # @return [Enumerator]
@@ -118,20 +127,22 @@ module FFIDB
             yaml = yaml_doc.to_ruby.transform_keys!(&:to_sym)
             case yaml_doc.children.first.tag.to_sym
               when :'!typedef'
-                # TODO: support typedefs
+                yield Typedef.new(yaml[:name], Type.for(yaml[:type]), yaml[:comment])
               when :'!enum'
                 yield Enum.new(yaml[:name], yaml[:values] || {}, yaml[:comment])
               when :'!struct'
                 yield Struct.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
+              when :'!union'
+                yield Union.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
               when :'!function'
                 parameters = (yaml[:parameters] || {}).inject({}) do |ps, (k, v)|
                   k = k.to_sym
-                  ps[k] = Parameter.new(k, Type.new(v))
+                  ps[k] = Parameter.new(k, Type.for(v))
                   ps
                 end
                 yield Function.new(
                   name: yaml[:name],
-                  type: Type.new(yaml[:type]),
+                  type: Type.for(yaml[:type]),
                   parameters: parameters,
                   definition: !yaml.has_key?(:definition) ? nil : Location.new(
                     file: yaml.dig(:definition, 'file'),

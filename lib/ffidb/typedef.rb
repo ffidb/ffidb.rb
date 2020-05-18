@@ -1,27 +1,28 @@
 # This is free and unencumbered software released into the public domain.
 
 require_relative 'symbolic'
+require_relative 'type'
 
 module FFIDB
-  class Enum < ::Struct.new(:name, :values, :comment)
+  class Typedef < ::Struct.new(:name, :type, :comment)
     include Symbolic
 
     ##
     # @param  [Symbol, #to_sym] name
-    # @param  [Map<String, Integer>] values
+    # @param  [Type] type
     # @param  [String, #to_s] comment
-    def initialize(name, values = {}, comment = nil)
-      super(name.to_sym, values || {}, comment&.to_s)
+    def initialize(name, type, comment = nil)
+      super(name.to_sym, Type.for(type), comment&.to_s)
     end
 
     ##
     # @return [Boolean]
-    def enum?() return true end
+    def typedef?() return true end
 
     ##
     # @return [String]
     def to_s
-      "enum #{self.name}"
+      "typedef #{self.type} #{self.name}"
     end
 
     ##
@@ -29,9 +30,9 @@ module FFIDB
     def to_h
       {
         name: self.name.to_s,
+        type: self.type.to_s,
         comment: self.comment,
-        values: self.values,
       }.delete_if { |k, v| v.nil? }
     end
-  end # Enum
+  end # Typedef
 end # FFIDB

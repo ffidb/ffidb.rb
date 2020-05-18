@@ -1,5 +1,7 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'type'
+
 module FFIDB
   class Parameter < ::Struct.new(:name, :type)
     include Comparable
@@ -8,8 +10,7 @@ module FFIDB
     # @param  [Symbol, #to_sym] name
     # @param  [Type] type
     def initialize(name, type = nil)
-      raise ArgumentError, "Expected FFIDB::Type, got #{type.inspect}" if type && !type.is_a?(Type)
-      super(name.to_sym, type)
+      super(name.to_sym, type ? Type.for(type) : nil)
     end
 
     ##

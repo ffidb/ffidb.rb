@@ -16,6 +16,8 @@ require_relative 'ffidb/struct'
 require_relative 'ffidb/symbolic'
 require_relative 'ffidb/sysexits'
 require_relative 'ffidb/type'
+require_relative 'ffidb/typedef'
+require_relative 'ffidb/union'
 require_relative 'ffidb/version'
 
 module FFIDB
