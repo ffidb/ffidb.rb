@@ -1,5 +1,8 @@
 # This is free and unencumbered software released into the public domain.
 
+#require 'erb'
+require 'tilt' # https://rubygems.org/gems/tilt
+
 module FFIDB
   class Exporter
     def self.for(format) # TODO
@@ -66,19 +69,19 @@ module FFIDB
     end
 
     def export_typedef(typedef, disabled: nil)
-      raise "not implemented" # subclasses must implement this
+      (@typedefs ||= []) << typedef
     end
 
     def export_enum(enum, disabled: nil)
-      raise "not implemented" # subclasses must implement this
+      (@enums ||= []) << enum
     end
 
     def export_struct(struct, disabled: nil)
-      raise "not implemented" # subclasses must implement this
+      (@structs ||= []) << struct
     end
 
     def export_function(function, disabled: nil)
-      raise "not implemented" # subclasses must implement this
+      (@functions ||= []) << function
     end
 
     def finish_library() end
@@ -95,6 +98,19 @@ module FFIDB
 
     def print(*args)
       @stream.print *args
+    end
+
+    def render_template(template_name)
+      #ERB.new(self.load_template(template_name)).result(binding)
+      Tilt.new(self.path_to_template(template_name)).render(self)
+    end
+
+    def load_template(template_name)
+      File.read(self.path_to_template(template_name))
+    end
+
+    def path_to_template(template_name)
+      File.expand_path("../../etc/templates/#{template_name}", __dir__)
     end
   end # Exporter
 end # FFIDB

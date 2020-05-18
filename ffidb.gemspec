@@ -20,7 +20,8 @@ Gem::Specification.new do |gem|
   }
 
   gem.platform           = Gem::Platform::RUBY
-  gem.files              = %w(AUTHORS CHANGES.md CREDITS.md README.md UNLICENSE VERSION) + Dir.glob('lib/**/*.rb')
+  gem.files              = %w(AUTHORS CHANGES.md CREDITS.md README.md UNLICENSE VERSION) +
+                           Dir.glob('etc/templates/*.erb') + Dir.glob('lib/**/*.rb')
   gem.bindir             = %q(bin)
   gem.executables        = %w(ffidb)
   gem.require_paths      = %w(lib)
@@ -34,6 +35,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rspec',     '>= 3.9'
   gem.add_development_dependency 'yard' ,     '>= 0.9'
   gem.add_development_dependency 'ffi-clang', '>= 0.6'
+  gem.add_runtime_dependency     'tilt',      '~> 2.0'
   gem.add_runtime_dependency     'thor',      '~> 1.0'
   gem.post_install_message       = nil
 end

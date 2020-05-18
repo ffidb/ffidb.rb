@@ -55,51 +55,14 @@ module FFIDB::Exporters
       nil                  => :pointer,
     }
 
-    def begin
-      puts "# #{FFIDB.header}" if self.header?
-      puts if self.header?
-      puts "require 'ffi'"
-    end
-
     def begin_library(library)
       @library = library
       @module = self.options[:module] || library.name.capitalize
-      library_paths = self.dlopen_paths_for(library)
-      puts
-      puts <<~EOS
-      module #{@module}
-        extend FFI::Library
-        ffi_lib [#{library_paths.map(&:inspect).join(', ')}]
-      EOS
+      @library_paths = self.dlopen_paths_for(library)
     end
 
     def finish_library
-      puts "end # #{@module}"
-    end
-
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      puts
-      print ' '*2
-      puts "class #{struct.name} < FFI::Struct"
-      # TODO
-      print ' '*2
-      puts 'end'
-    end
-
-    def export_function(function, **kwargs)
-      puts
-      parameters = function.parameters.each_value.map { |p| rb_type(p.type).inspect }
-      print '  '
-      print '#' if kwargs[:disabled]
-      puts "attach_function :#{function.name}, [#{parameters.join(', ')}], :#{rb_type(function.type)}"
+      puts self.render_template('ruby.erb')
     end
 
     protected
