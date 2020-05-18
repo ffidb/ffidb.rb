@@ -120,9 +120,9 @@ module FFIDB
               when :'!typedef'
                 # TODO: support typedefs
               when :'!enum'
-                yield Enum.new(yaml[:name], {}, yaml[:comment])
+                yield Enum.new(yaml[:name], yaml[:values] || {}, yaml[:comment])
               when :'!struct'
-                yield Struct.new(yaml[:name], {}, yaml[:comment])
+                yield Struct.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
               when :'!function'
                 parameters = (yaml[:parameters] || {}).inject({}) do |ps, (k, v)|
                   k = k.to_sym

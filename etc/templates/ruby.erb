@@ -10,6 +10,9 @@ module <%= @module %>
 <% for enum in @enums || [] %>
 
   <%= enum.name %> = :int
+  <% for name, value in enum.values || {} %>
+  <%= name %> = <%= value %>
+  <% end %>
 <% end %>
 <% for struct in @structs || [] %>
 
