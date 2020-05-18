@@ -14,6 +14,9 @@ import ctypes, ctypes.util
 )
 <% for enum in @enums || [] %>
 
+<% if enum.comment %>
+# <%= enum.comment %>
+<% end %>
 <%= enum.name %> = ctypes.c_int
 <% for name, value in enum.values || {} %>
 <%= name %> = <%= value %>
@@ -21,11 +24,17 @@ import ctypes, ctypes.util
 <% end %>
 <% for struct in @structs || [] %>
 
+<% if struct.comment %>
+# <%= struct.comment %>
+<% end %>
 class <%= struct.name %>(Structure):
     pass
 <% end %>
 <% for function in @functions || [] %>
 
+<% if function.comment %>
+# <%= function.comment %>
+<% end %>
 <%= function.name %> = <%= @library.name %>.<%= function.name %>
 <%= function.name %>.restype = <%= py_type(function.type) %>
 <%= function.name %>.argtypes = [<%=

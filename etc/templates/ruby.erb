@@ -9,6 +9,9 @@ module <%= @module %>
   ffi_lib [<%= @library_paths.map(&:inspect).join(', ') %>]
 <% for enum in @enums || [] %>
 
+  <% if enum.comment %>
+  # <%= enum.comment %>
+  <% end %>
   <%= enum.name %> = :int
   <% for name, value in enum.values || {} %>
   <%= name %> = <%= value %>
@@ -16,11 +19,17 @@ module <%= @module %>
 <% end %>
 <% for struct in @structs || [] %>
 
+  <% if struct.comment %>
+  # <%= struct.comment %>
+  <% end %>
   class <%= struct.name %> < FFI::Struct
   end
 <% end %>
 <% for function in @functions || [] %>
 
+  <% if function.comment %>
+  # <%= function.comment %>
+  <% end %>
   attach_function :<%= function.name %>, [<%=
     function.parameters.each_value.map { |p| rb_type(p.type).inspect }.join(', ')
   %>], :<%= rb_type(function.type) %>
