@@ -35,7 +35,11 @@ module FFIDB
     ##
     # @return [Hash<Symbol, Type>]
     def to_h
-      {name: self.name.to_s, comment: self.comment}.delete_if { |k, v| v.nil? }
+      {
+        name: self.name.to_s,
+        comment: self.comment,
+        fields: self.fields,
+      }.delete_if { |k, v| v.nil? }
     end
 
     ##
