@@ -12,16 +12,16 @@ import ctypes, ctypes.util
     or "<%= @library.dlopen.first %>"
 <% end %>
 )
-<% for enum in @enums %>
+<% for enum in @enums || [] %>
 
 <%= enum.name %> = ctypes.c_int
 <% end %>
-<% for struct in @structs %>
+<% for struct in @structs || [] %>
 
 class <%= struct.name %>(Structure):
     pass
 <% end %>
-<% for function in @functions %>
+<% for function in @functions || [] %>
 
 <%= function.name %> = <%= @library.name %>.<%= function.name %>
 <%= function.name %>.restype = <%= py_type(function.type) %>

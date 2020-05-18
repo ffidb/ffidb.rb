@@ -7,16 +7,16 @@ require 'ffi'
 module <%= @module %>
   extend FFI::Library
   ffi_lib [<%= @library_paths.map(&:inspect).join(', ') %>]
-<% for enum in @enums %>
+<% for enum in @enums || [] %>
 
   <%= enum.name %> = :int
 <% end %>
-<% for struct in @structs %>
+<% for struct in @structs || [] %>
 
   class <%= struct.name %> < FFI::Struct
   end
 <% end %>
-<% for function in @functions %>
+<% for function in @functions || [] %>
 
   attach_function :<%= function.name %>, [<%=
     function.parameters.each_value.map { |p| rb_type(p.type).inspect }.join(', ')
