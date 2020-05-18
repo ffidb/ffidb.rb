@@ -6,7 +6,7 @@ require 'pathname'
 require 'yaml'
 
 module FFIDB
-  class Function < Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
+  class Function < ::Struct.new(:name, :type, :parameters, :definition, :comment, keyword_init: true)
     include Comparable
 
     alias_method :result_type, :type
@@ -49,7 +49,7 @@ module FFIDB
     # @return [Hash<Symbol, Object>]
     def to_h
       {
-        name: self.name,
+        name: self.name.to_s,
         type: self.type.to_s,
         parameters: self.parameters&.transform_values { |v| v.type.to_s },
         definition: self.definition&.to_h,

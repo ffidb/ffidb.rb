@@ -3,7 +3,7 @@
 require 'pathname'
 
 module FFIDB
-  class Header < Struct.new(:name, :comment, :functions, keyword_init: true)
+  class Header < ::Struct.new(:name, :comment, :functions, keyword_init: true)
     include Comparable
 
     ##

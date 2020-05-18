@@ -1,5 +1,6 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'ffidb/enum'
 require_relative 'ffidb/errors'
 require_relative 'ffidb/exporter'
 require_relative 'ffidb/exporters'
@@ -11,6 +12,7 @@ require_relative 'ffidb/location'
 require_relative 'ffidb/parameter'
 require_relative 'ffidb/parser'
 require_relative 'ffidb/registry'
+require_relative 'ffidb/struct'
 require_relative 'ffidb/sysexits'
 require_relative 'ffidb/type'
 require_relative 'ffidb/version'

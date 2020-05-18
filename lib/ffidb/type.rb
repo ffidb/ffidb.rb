@@ -1,7 +1,7 @@
 # This is free and unencumbered software released into the public domain.
 
 module FFIDB
-  class Type < Struct.new(:spec)
+  class Type < ::Struct.new(:spec)
     include Comparable
 
     ##
