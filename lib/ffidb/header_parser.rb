@@ -3,7 +3,7 @@
 require 'pathname'
 
 module FFIDB
-  class Parser
+  class HeaderParser
     attr_reader :base_directory
     attr_reader :debug
     attr_reader :defines
@@ -215,5 +215,5 @@ module FFIDB
       path = Pathname(path) unless path.is_a?(Pathname)
       self.base_directory ? path.relative_path_from(self.base_directory) : path
     end
-  end # Parser
+  end # HeaderParser
 end # FFIDB

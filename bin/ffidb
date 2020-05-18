@@ -227,7 +227,7 @@ class CLI < Thor
       exit EX_UNAVAILABLE
     end
 
-    FFIDB::Parser.new(base_directory: base_directory, debug: verbose? || debug?).tap do |parser|
+    FFIDB::HeaderParser.new(base_directory: base_directory, debug: verbose? || debug?).tap do |parser|
       # Parse a library.yaml configuration file, if given:
       if config_path = self.options[:config]
         config_path = Pathname(config_path)

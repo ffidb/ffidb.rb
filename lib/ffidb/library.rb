@@ -1,16 +1,20 @@
 # This is free and unencumbered software released into the public domain.
 
+require_relative 'library_parser'
+require_relative 'symbol_table'
+
 require 'pathname'
-require 'psych'
 require 'yaml'
 
 module FFIDB
   class Library
+    include SymbolTable
     include Comparable
 
     attr_reader :name
     attr_reader :version
     attr_reader :path
+
     attr_reader :summary
     attr_reader :website
     attr_reader :source
@@ -48,27 +52,6 @@ module FFIDB
     ##
     # @return [String]
     def soname() self.objects&.first end
-
-    ##
-    # @return [Array<String>]
-    def types
-      self.each_type.to_a
-    end
-
-    ##
-    # @yield  [type_name]
-    # @return [Enumerator]
-    def each_type(&block)
-      return self.to_enum(:each_type) unless block_given?
-      types = {}
-      self.each_function do |function|
-        types[function.type] ||= true
-        function.parameters.each_value do |parameter|
-          types[parameter.type] ||= true
-        end
-      end
-      types.keys.sort.each(&block)
-    end
 
     ##
     # @yield  [typedef]
@@ -121,39 +104,7 @@ module FFIDB
     # @return [Enumerator]
     def each_symbol(&block)
       return self.to_enum(:each_symbol) unless block_given?
-      self.path.join(self.version).glob('*.yaml') do |path|
-        path.open do |file|
-          Psych.parse_stream(file) do |yaml_doc|
-            yaml = yaml_doc.to_ruby.transform_keys!(&:to_sym)
-            case yaml_doc.children.first.tag.to_sym
-              when :'!typedef'
-                yield Typedef.new(yaml[:name], Type.for(yaml[:type]), yaml[:comment])
-              when :'!enum'
-                yield Enum.new(yaml[:name], yaml[:values] || {}, yaml[:comment])
-              when :'!struct'
-                yield Struct.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
-              when :'!union'
-                yield Union.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
-              when :'!function'
-                parameters = (yaml[:parameters] || {}).inject({}) do |ps, (k, v)|
-                  k = k.to_sym
-                  ps[k] = Parameter.new(k, Type.for(v))
-                  ps
-                end
-                yield Function.new(
-                  name: yaml[:name],
-                  type: Type.for(yaml[:type]),
-                  parameters: parameters,
-                  definition: !yaml.has_key?(:definition) ? nil : Location.new(
-                    file: yaml.dig(:definition, 'file'),
-                    line: yaml.dig(:definition, 'line'),
-                  ),
-                  comment: yaml[:comment],
-                )
-            end
-          end
-        end
-      end
+      LibraryParser.new(self.path.join(self.version)).each_symbol(&block)
     end
   end # Library
 end # FFIDB

@@ -4,6 +4,6 @@ require_relative '../lib/ffidb'
 
 include FFIDB
 
-RSpec.describe FFIDB::Parser do
+RSpec.describe FFIDB::HeaderParser do
   # TODO
 end
