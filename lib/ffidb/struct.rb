@@ -30,7 +30,7 @@ module FFIDB
       {
         name: self.name.to_s,
         comment: self.comment,
-        fields: self.fields,
+        fields: self.fields&.transform_values { |t| t.to_s },
       }.delete_if { |k, v| v.nil? }
     end
   end # Struct

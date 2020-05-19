@@ -102,7 +102,11 @@ module FFIDB
           when :enum
             yield Enum.new(yaml[:name], yaml[:values] || {}, yaml[:comment])
           when :struct
-            yield Struct.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
+            fields = (yaml[:fields] || {}).inject({}) do |fs, (k, v)|
+              fs[k.to_sym] = Type.for(v)
+              fs
+            end
+            yield Struct.new(yaml[:name], fields, yaml[:comment])
           when :union
             yield Union.new(yaml[:name], yaml[:fields] || {}, yaml[:comment])
           when :function
