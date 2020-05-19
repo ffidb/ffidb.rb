@@ -23,6 +23,14 @@ module <%= @module %>
   # <%= struct.comment %>
   <% end %>
   class <%= struct.name %> < FFI::Struct
+  <% for (name, type), i in (struct.fields || {}).each_with_index %>
+    <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%=
+      case
+        when type.array? then [format_type(type.array_type), type.array_size].inspect
+        else format_type(type).inspect
+      end
+    %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
+  <% end %>
   end
 <% end %>
 <% for function in @functions || [] %>
@@ -31,7 +39,7 @@ module <%= @module %>
   # <%= function.comment %>
   <% end %>
   attach_function :<%= function.name %>, [<%=
-    function.parameters.each_value.map { |p| rb_type(p.type).inspect }.join(', ')
-  %>], :<%= rb_type(function.type) %>
+    function.parameters.each_value.map { |p| format_type(p.type).inspect }.join(', ')
+  %>], :<%= format_type(function.type) %>
 <% end %>
 end # <%= @module %>

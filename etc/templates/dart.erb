@@ -24,18 +24,28 @@ abstract class <%= enum.name %> {
 <% if struct.comment %>
 /// <%= struct.comment %>
 <% end %>
-class <%= struct.name %> extends Struct {}
+class <%= struct.name %> extends Struct {
+  <% for (name, type), i in (struct.fields || {}).each_with_index %>
+<%= i.zero? ? '' : "\n" -%>
+    <% unless type.pointer? %>
+    @<%= format_ffi_type(type) %>() // <%= type %>
+    <% else %>
+    // <%= type %>
+    <% end %>
+    <%= format_dart_type(type) %> <%= name %>;
+  <% end %>
+}
 <% end %>
 <% for function in @functions || [] %>
 
 <% if function.comment %>
 /// <%= function.comment %>
 <% end %>
-final <%= dart_type(function.type) %> Function(<%=
-      function.parameters.each_value.map { |p| dart_type(p.type) }.join(', ')
+final <%= format_dart_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| format_dart_type(p.type) }.join(', ')
     %>) <%= function.name %> = <%= @library.name %>
-    .lookup<NativeFunction<<%= ffi_type(function.type) %> Function(<%=
-      function.parameters.each_value.map { |p| ffi_type(p.type) }.join(', ')
+    .lookup<NativeFunction<<%= format_ffi_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| format_ffi_type(p.type) }.join(', ')
     %>)>>('<%= function.name %>')
     .asFunction();
 <% end %>

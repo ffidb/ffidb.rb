@@ -90,15 +90,16 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
-    def dart_type(c_type)
-      TYPE_MAP_DART[self.ffi_type(c_type)] || TYPE_MAP_DART[nil]
+    def format_dart_type(c_type)
+      TYPE_MAP_DART[self.format_ffi_type(c_type)] || TYPE_MAP_DART[nil]
     end
 
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
-    def ffi_type(c_type)
+    def format_ffi_type(c_type)
       case
+        #when c_type.array? then # TODO: https://github.com/dart-lang/sdk/issues/35763
         when c_type.enum? then :Int32
         else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
       end

@@ -28,7 +28,15 @@ import ctypes, ctypes.util
 # <%= struct.comment %>
 <% end %>
 class <%= struct.name %>(Structure):
-    pass
+  <% if struct.fields.nil? || struct.fields.empty? %>
+    _fields_ = []
+  <% else %>
+    _fields_ = [
+    <% for name, type in struct.fields || {} %>
+        (<%= name.to_s.inspect %>, <%= format_type(type) %>),  # <%= type %>
+    <% end %>
+    ]
+  <% end %>
 <% end %>
 <% for function in @functions || [] %>
 
@@ -36,8 +44,8 @@ class <%= struct.name %>(Structure):
 # <%= function.comment %>
 <% end %>
 <%= function.name %> = <%= @library.name %>.<%= function.name %>
-<%= function.name %>.restype = <%= py_type(function.type) %>
+<%= function.name %>.restype = <%= format_type(function.type) %>
 <%= function.name %>.argtypes = [<%=
-  function.parameters.each_value.map { |p| py_type(p.type) }.join(', ')
+  function.parameters.each_value.map { |p| format_type(p.type) }.join(', ')
 %>]
 <% end %>

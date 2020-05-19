@@ -67,13 +67,14 @@ module FFIDB::Exporters
 
     ##
     # @param  [FFIDB::Type] c_type
-    # @return [String]
-    def py_type(c_type)
+    # @return [#to_s]
+    def format_type(c_type)
       case
         when c_type.enum? then 'ctypes.c_int'
-        else case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
-          when :None then py_type.to_s
-          else "ctypes.c_#{py_type}"
+        when c_type.array? then [self.format_type(c_type.array_type), '*', c_type.array_size].join(' ')
+        else case format_type = TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
+          when :None then format_type.to_s
+          else "ctypes.c_#{format_type}"
         end
       end
     end
