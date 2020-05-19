@@ -4,6 +4,7 @@
 <% end %>
 import ctypes, ctypes.util
 <% for library in @libraries %>
+<% if @functions[library] %>
 
 <%= library.name %> = ctypes.CDLL(
 <% self.dlopen_paths_for(library).each_with_index do |library_path, i| %>
@@ -13,6 +14,7 @@ import ctypes, ctypes.util
     or "<%= library.dlopen.first %>"
 <% end %>
 )
+<% end %>
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>

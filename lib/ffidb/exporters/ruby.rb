@@ -67,7 +67,7 @@ module FFIDB::Exporters
     def param_type(c_type)
       case
         when c_type.enum? then :int
-        when c_type.array? then [self.format_type(c_type.array_type), c_type.array_size]
+        when c_type.array? then [self.param_type(c_type.array_type), c_type.array_size]
         else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
       end
     end

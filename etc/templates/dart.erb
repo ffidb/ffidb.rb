@@ -5,8 +5,10 @@
 import 'dart:ffi';
 import 'dart:io' as io;
 <% for library in @libraries %>
+<% if @functions[library] %>
 
 final <%= library.name %> = DynamicLibrary.open('<%= dlopen_paths_for(library).first %>');
+<% end %>
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>

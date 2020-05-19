@@ -6,8 +6,10 @@ require 'ffi'
 <% for library in @libraries %>
 
 module <%= options[:module] || library.name.capitalize %>
+<% if @functions[library] %>
   extend FFI::Library
   ffi_lib [<%= dlopen_paths_for(library).map(&:inspect).join(', ') %>]
+<% end %>
 <% for enum in @enums[library] || [] %>
 
   <% if enum.comment %>
