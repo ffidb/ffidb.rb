@@ -76,11 +76,6 @@ module FFIDB::Exporters
       nil                  => 'Pointer<Void>',
     }
 
-    def begin_library(library)
-      @library = library
-      @soname = self.dlopen_paths_for(library).first # FIXME
-    end
-
     def finish
       puts self.render_template('dart.erb')
     end
@@ -90,19 +85,21 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
-    def format_dart_type(c_type)
-      TYPE_MAP_DART[self.format_ffi_type(c_type)] || TYPE_MAP_DART[nil]
+    def dart_param_type(c_type)
+      TYPE_MAP_DART[self.ffi_param_type(c_type)] || TYPE_MAP_DART[nil]
     end
+    alias_method :dart_struct_type, :dart_param_type
 
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
-    def format_ffi_type(c_type)
+    def ffi_param_type(c_type)
       case
         #when c_type.array? then # TODO: https://github.com/dart-lang/sdk/issues/35763
         when c_type.enum? then :Int32
         else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI[nil]
       end
     end
+    alias_method :ffi_struct_type, :ffi_param_type
   end # Dart
 end # FFIDB::Exporters

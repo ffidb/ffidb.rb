@@ -55,12 +55,6 @@ module FFIDB::Exporters
       nil                  => :pointer,
     }
 
-    def begin_library(library)
-      @library = library
-      @module = self.options[:module] || library.name.capitalize
-      @library_paths = self.dlopen_paths_for(library)
-    end
-
     def finish
       puts self.render_template('ruby.erb')
     end
@@ -69,13 +63,14 @@ module FFIDB::Exporters
 
     ##
     # @param  [FFIDB::Type] c_type
-    # @return [#to_s]
-    def format_type(c_type)
+    # @return [#inspect]
+    def param_type(c_type)
       case
         when c_type.enum? then :int
-        when c_type.array? then [self.format_type(c_type.array_type), c_type.array_size].inspect
+        when c_type.array? then [self.format_type(c_type.array_type), c_type.array_size]
         else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
       end
     end
+    alias_method :struct_type, :param_type
   end # Ruby
 end # FFIDB::Exporters

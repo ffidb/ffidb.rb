@@ -3,16 +3,17 @@
 
 <% end %>
 import ctypes, ctypes.util
+<% for library in @libraries %>
 
-<%= @library.name %> = ctypes.CDLL(
-<% self.dlopen_paths_for(@library).each_with_index do |library_path, i| %>
+<%= library.name %> = ctypes.CDLL(
+<% self.dlopen_paths_for(library).each_with_index do |library_path, i| %>
     <%= i.nonzero? ? 'or ' : '' %>ctypes.util.find_library("<%= library_path %>")
 <% end %>
 <% unless options[:library_path] %>
-    or "<%= @library.dlopen.first %>"
+    or "<%= library.dlopen.first %>"
 <% end %>
 )
-<% for enum in @enums || [] %>
+<% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>
 # <%= enum.comment %>
@@ -22,7 +23,7 @@ import ctypes, ctypes.util
 <%= name %> = <%= value %>
 <% end %>
 <% end %>
-<% for struct in @structs || [] %>
+<% for struct in @structs[library] || [] %>
 
 <% if struct.comment %>
 # <%= struct.comment %>
@@ -33,19 +34,20 @@ class <%= struct.name %>(Structure):
   <% else %>
     _fields_ = [
     <% for name, type in struct.fields || {} %>
-        (<%= name.to_s.inspect %>, <%= format_type(type) %>),  # <%= type %>
+        (<%= name.to_s.inspect %>, <%= struct_type(type) %>),  # <%= type %>
     <% end %>
     ]
   <% end %>
 <% end %>
-<% for function in @functions || [] %>
+<% for function in @functions[library] || [] %>
 
 <% if function.comment %>
 # <%= function.comment %>
 <% end %>
-<%= function.name %> = <%= @library.name %>.<%= function.name %>
-<%= function.name %>.restype = <%= format_type(function.type) %>
+<%= function.name %> = <%= library.name %>.<%= function.name %>
+<%= function.name %>.restype = <%= param_type(function.type) %>
 <%= function.name %>.argtypes = [<%=
-  function.parameters.each_value.map { |p| format_type(p.type) }.join(', ')
+  function.parameters.each_value.map { |p| param_type(p.type) }.join(', ')
 %>]
+<% end %>
 <% end %>

@@ -4,9 +4,10 @@
 <% end %>
 import 'dart:ffi';
 import 'dart:io' as io;
+<% for library in @libraries %>
 
-final <%= @library.name %> = DynamicLibrary.open('<%= @soname %>');
-<% for enum in @enums || [] %>
+final <%= library.name %> = DynamicLibrary.open('<%= dlopen_paths_for(library).first %>');
+<% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>
 /// <%= enum.comment %>
@@ -19,7 +20,7 @@ abstract class <%= enum.name %> {
   <% end %>
 }
 <% end %>
-<% for struct in @structs || [] %>
+<% for struct in @structs[library] || [] %>
 
 <% if struct.comment %>
 /// <%= struct.comment %>
@@ -28,24 +29,25 @@ class <%= struct.name %> extends Struct {
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
 <%= i.zero? ? '' : "\n" -%>
     <% unless type.pointer? %>
-    @<%= format_ffi_type(type) %>() // <%= type %>
+    @<%= ffi_struct_type(type) %>() // <%= type %>
     <% else %>
     // <%= type %>
     <% end %>
-    <%= format_dart_type(type) %> <%= name %>;
+    <%= dart_struct_type(type) %> <%= name %>;
   <% end %>
 }
 <% end %>
-<% for function in @functions || [] %>
+<% for function in @functions[library] || [] %>
 
 <% if function.comment %>
 /// <%= function.comment %>
 <% end %>
-final <%= format_dart_type(function.type) %> Function(<%=
-      function.parameters.each_value.map { |p| format_dart_type(p.type) }.join(', ')
-    %>) <%= function.name %> = <%= @library.name %>
-    .lookup<NativeFunction<<%= format_ffi_type(function.type) %> Function(<%=
-      function.parameters.each_value.map { |p| format_ffi_type(p.type) }.join(', ')
+final <%= dart_param_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| dart_param_type(p.type) }.join(', ')
+    %>) <%= function.name %> = <%= library.name %>
+    .lookup<NativeFunction<<%= ffi_param_type(function.type) %> Function(<%=
+      function.parameters.each_value.map { |p| ffi_param_type(p.type) }.join(', ')
     %>)>>('<%= function.name %>')
     .asFunction();
+<% end %>
 <% end %>

@@ -62,33 +62,43 @@ module FFIDB
 
     def begin() end
 
-    def begin_library(library) end
+    def begin_library(library)
+      @libraries ||= []
+      @libraries << (@library = library)
+      @typedefs ||= {}
+      @enums ||= {}
+      @structs ||= {}
+      @unions ||= {}
+      @functions ||= {}
+    end
 
     def export_symbol(symbol, disabled: nil)
       self.__send__("export_#{symbol.kind}", symbol, disabled: disabled)
     end
 
     def export_typedef(typedef, disabled: nil)
-      (@typedefs ||= []) << typedef
+      (@typedefs[@library] ||= []) << typedef
     end
 
     def export_enum(enum, disabled: nil)
-      (@enums ||= []) << enum
+      (@enums[@library] ||= []) << enum
     end
 
     def export_struct(struct, disabled: nil)
-      (@structs ||= []) << struct
+      (@structs[@library] ||= []) << struct
     end
 
     def export_union(union, disabled: nil)
-      (@unions ||= []) << union
+      (@unions[@library] ||= []) << union
     end
 
     def export_function(function, disabled: nil)
-      (@functions ||= []) << function
+      (@functions[@library] ||= []) << function
     end
 
-    def finish_library() end
+    def finish_library
+      @library = nil
+    end
 
     def finish() end
 

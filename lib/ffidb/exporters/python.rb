@@ -55,10 +55,6 @@ module FFIDB::Exporters
       nil                  => :void_p,
     }
 
-    def begin_library(library)
-      @library = library
-    end
-
     def finish
       puts self.render_template('python.erb')
     end
@@ -68,7 +64,7 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
-    def format_type(c_type)
+    def param_type(c_type)
       case
         when c_type.enum? then 'ctypes.c_int'
         when c_type.array? then [self.format_type(c_type.array_type), '*', c_type.array_size].join(' ')
@@ -78,5 +74,6 @@ module FFIDB::Exporters
         end
       end
     end
+    alias_method :struct_type, :param_type
   end # Python
 end # FFIDB::Exporters

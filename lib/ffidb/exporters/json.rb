@@ -24,6 +24,7 @@ module FFIDB::Exporters
     alias_method :export_typedef, :export_symbol
     alias_method :export_enum, :export_symbol
     alias_method :export_struct, :export_symbol
+    alias_method :export_union, :export_symbol
     alias_method :export_function, :export_symbol
 
     def finish_library

@@ -3,11 +3,12 @@
 
 <% end %>
 require 'ffi'
+<% for library in @libraries %>
 
-module <%= @module %>
+module <%= options[:module] || library.name.capitalize %>
   extend FFI::Library
-  ffi_lib [<%= @library_paths.map(&:inspect).join(', ') %>]
-<% for enum in @enums || [] %>
+  ffi_lib [<%= dlopen_paths_for(library).map(&:inspect).join(', ') %>]
+<% for enum in @enums[library] || [] %>
 
   <% if enum.comment %>
   # <%= enum.comment %>
@@ -17,29 +18,25 @@ module <%= @module %>
   <%= name %> = <%= value %>
   <% end %>
 <% end %>
-<% for struct in @structs || [] %>
+<% for struct in @structs[library] || [] %>
 
   <% if struct.comment %>
   # <%= struct.comment %>
   <% end %>
   class <%= struct.name %> < FFI::Struct
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
-    <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%=
-      case
-        when type.array? then [format_type(type.array_type), type.array_size].inspect
-        else format_type(type).inspect
-      end
-    %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
+    <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%= struct_type(type).inspect %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
   <% end %>
   end
 <% end %>
-<% for function in @functions || [] %>
+<% for function in @functions[library] || [] %>
 
   <% if function.comment %>
   # <%= function.comment %>
   <% end %>
   attach_function :<%= function.name %>, [<%=
-    function.parameters.each_value.map { |p| format_type(p.type).inspect }.join(', ')
-  %>], :<%= format_type(function.type) %>
+    function.parameters.each_value.map { |p| param_type(p.type).inspect }.join(', ')
+  %>], :<%= param_type(function.type) %>
 <% end %>
-end # <%= @module %>
+end # <%= options[:module] || library.name.capitalize %>
+<% end %>
