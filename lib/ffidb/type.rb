@@ -61,6 +61,12 @@ module FFIDB
 
     ##
     # @return [Boolean]
+    def union?
+      !(self.pointer?) && (self.spec.start_with?('union ') || self.spec.start_with?('const union '))
+    end
+
+    ##
+    # @return [Boolean]
     def integer?
       case self.spec
         when 'char', 'short', 'int', 'long', 'long long' then true
@@ -111,6 +117,28 @@ module FFIDB
 
     ##
     # @return [Boolean]
+    def array?
+      self.spec.include?('[')
+    end
+
+    ##
+    # @return [Type]
+    def array_type
+      if self.array?
+        self.class.for(self.spec.gsub(/\s+(\[[^\]]+\])/, ''))
+      end
+    end
+
+    ##
+    # @return [Integer]
+    def array_size
+      if self.array?
+        (/\[([^\]]+)\]/ =~ self.spec) && $1.to_i
+      end
+    end
+
+    ##
+    # @return [Boolean]
     def pointer?
       self.spec.end_with?('*') ||
       self.array_pointer?      ||
@@ -138,6 +166,12 @@ module FFIDB
     # @return [Boolean]
     def struct_pointer?
       self.pointer? && (self.spec.start_with?('struct ') || self.spec.start_with?('const struct '))
+    end
+
+    ##
+    # @return [Boolean]
+    def union_pointer?
+      self.pointer? && (self.spec.start_with?('union ') || self.spec.start_with?('const union '))
     end
 
     ##
