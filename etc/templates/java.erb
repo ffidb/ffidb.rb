@@ -1,0 +1,50 @@
+<% if header? %>
+// <%= FFIDB.header %>
+
+<% end %>
+import com.sun.jna.Library;
+import com.sun.jna.Native;
+import com.sun.jna.NativeLong;
+import com.sun.jna.Pointer;
+import com.sun.jna.Structure.FFIType.size_t;
+import com.sun.jna.platform.linux.XAttr.ssize_t;
+<% for library in @libraries %>
+
+public interface <%= library.interface_name %> extends Library {
+<% if @functions[library] %>
+  <%= library.interface_name %> INSTANCE = (<%= library.interface_name %>)Native.load("<%= dlopen_paths_for(library).first %>", <%= library.interface_name %>.class);
+<% end %>
+<% for enum in @enums[library] || [] %>
+
+<% if enum.comment %>
+  // <%= enum.comment %>
+<% end %>
+  public static class <%= enum.name %> {
+  <% for name, value in enum.values || {} %>
+    public static final int <%= name %> = <%= value %>;
+  <% end %>
+  }
+<% end %>
+<% for struct in @structs[library] || [] %>
+
+  <% if struct.comment %>
+  // <%= struct.comment %>
+  <% end %>
+  @FieldOrder({ <%= (struct.fields || {}).keys.map(&:to_s).map(&:inspect).join(', ') %> })
+  public static class <%= struct.name %> extends Structure {
+  <% for name, type in struct.fields || {} %>
+    public <%= struct_type(type) %> <%= name %>; // <%= type %>
+  <% end %>
+  }
+<% end %>
+<% for function in @functions[library] || [] %>
+
+  <% if function.comment %>
+  // <%= function.comment %>
+  <% end %>
+  <%= param_type(function.type) %> <%= function.name %>(<%=
+  function.parameters.each_value.map { |p| [param_type(p.type), p.name].join(' ') }.join(', ')
+%>);
+<% end %>
+} // <%= library.interface_name %>
+<% end %>

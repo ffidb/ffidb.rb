@@ -56,50 +56,14 @@ module FFIDB::Exporters
       nil                  => :Pointer,
     }
 
-    def begin
-      puts "// #{FFIDB.header}" if self.header?
-      puts if self.header?
-      puts <<~EOS
-      import com.sun.jna.Library;
-      import com.sun.jna.Native;
-      import com.sun.jna.NativeLong;
-      import com.sun.jna.Pointer;
-      import com.sun.jna.Structure.FFIType.size_t;
-      import com.sun.jna.platform.linux.XAttr.ssize_t;
-      EOS
-    end
-
     def begin_library(library)
-      @interface = self.options[:module] || library.name.capitalize
-      soname = self.dlopen_paths_for(library).first # FIXME
-      puts
-      puts <<~EOS
-      public interface #{@interface} extends Library {
-        #{@interface} INSTANCE = (#{@interface})Native.load("#{soname}", #{@interface}.class);
-      EOS
+      interface_name = self.options[:module] || library.name.capitalize
+      library.define_singleton_method(:interface_name) { interface_name }
+      super(library)
     end
 
-    def finish_library
-      puts "} // #{@interface}"
-    end
-
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      puts
-      puts "  public static class #{struct.name} extends Structure {}" # TODO
-    end
-
-    def export_function(function, **kwargs)
-      parameters = function.parameters.each_value.map { |p| "#{jna_type(p.type)} #{p.name}" }
-      puts
-      puts "  #{jna_type(function.type)} #{function.name}(#{parameters.join(', ')});"
+    def finish
+      puts self.render_template('java.erb')
     end
 
     protected
@@ -107,11 +71,12 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [Symbol]
-    def jna_type(c_type)
+    def param_type(c_type)
       case
         when c_type.enum? then :int
         else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
       end
     end
+    alias_method :struct_type, :param_type
   end # Java
 end # FFIDB::Exporters
