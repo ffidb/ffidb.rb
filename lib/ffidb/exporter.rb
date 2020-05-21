@@ -10,6 +10,7 @@ module FFIDB
       case format&.to_sym
         when :c, :c99, :c11, :c18 then Exporters::C
         when :'c++', :'c++11', :'c++14', :'c++17', :'c++20', :cpp, :cxx then Exporters::Cpp
+        when :csv then Exporters::CSV
         when :dart, :flutter then Exporters::Dart
         when :go, :cgo then Exporters::Go
         when :java, :jna then Exporters::Java

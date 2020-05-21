@@ -7,6 +7,7 @@ end
 require_relative 'exporters/c'
 require_relative 'exporters/cpp'
 require_relative 'exporters/csharp'
+require_relative 'exporters/csv'
 require_relative 'exporters/dart'
 require_relative 'exporters/go'
 require_relative 'exporters/haskell'
