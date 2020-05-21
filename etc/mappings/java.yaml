@@ -1,0 +1,36 @@
+# See: https://github.com/java-native-access/jna/blob/master/www/Mappings.md
+# See: https://java-native-access.github.io/jna/5.5.0/javadoc/overview-summary.html#marshalling
+---
+_Bool: boolean
+char *: String
+char: byte
+const char *: String
+double: double
+float: float
+int16_t: short
+int32_t: int
+int64_t: long
+int8_t: byte
+int: int
+intptr_t: Pointer
+long double:              # https://github.com/java-native-access/jna/issues/860
+long long: long
+long: NativeLong
+off_t: size_t             # TODO
+short: short
+size_t: size_t            # https://github.com/java-native-access/jna/issues/1113
+ssize_t: ssize_t
+uint16_t: short
+uint32_t: int
+uint64_t: long
+uint8_t: byte
+uintptr_t: Pointer
+unsigned char: byte
+unsigned int: int
+unsigned long long: long
+unsigned long: NativeLong
+unsigned short: short
+va_list: Pointer
+void *: Pointer
+void: void
+wchar_t: char

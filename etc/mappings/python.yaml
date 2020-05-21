@@ -1,0 +1,35 @@
+# See: https://docs.python.org/3/library/ctypes.html
+---
+_Bool: c_bool
+char *: c_char_p
+char: c_char
+const char *: c_char_p
+double: c_double
+float: c_float
+int16_t: c_int16
+int32_t: c_int32
+int64_t: c_int64
+int8_t: c_int8
+int: c_int
+intptr_t: c_void_p
+long double: c_longdouble
+long long: c_longlong
+long: c_long
+off_t: c_size_t  # TODO: https://stackoverflow.com/q/43671524
+short: c_short
+size_t: c_size_t
+ssize_t: c_ssize_t
+uint16_t: c_uint16
+uint32_t: c_uint32
+uint64_t: c_uint64
+uint8_t: c_uint8
+uintptr_t: c_void_p
+unsigned char: c_ubyte
+unsigned int: c_uint
+unsigned long long: c_ulonglong
+unsigned long: c_ulong
+unsigned short: c_ushort
+va_list: c_void_p
+void *: c_void_p
+void: None
+wchar_t: c_wchar_t

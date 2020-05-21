@@ -8,52 +8,9 @@ module FFIDB::Exporters
   #
   # @see https://github.com/ffi/ffi/wiki
   class Ruby < FFIDB::Exporter
-    # @see https://github.com/ffi/ffi/wiki/Types
-    TYPE_MAP = {
-      'void'               => :void,
-      # standard signed-integer types:
-      'char'               => :char,
-      'short'              => :short,
-      'int'                => :int,
-      'long'               => :long,
-      'long long'          => :long_long,
-      # standard unsigned-integer types:
-      'unsigned char'      => :uchar,
-      'unsigned short'     => :ushort,
-      'unsigned int'       => :uint,
-      'unsigned long'      => :ulong,
-      'unsigned long long' => :ulong_long,
-      # standard floating-point types:
-      'float'              => :float,
-      'double'             => :double,
-      'long double'        => :long_double,
-      # standard character-sequence types:
-      'char *'             => :string,
-      'const char *'       => :string,
-      # <stdarg.h>
-      'va_list'            => :pointer,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # <stddef.h>
-      'size_t'             => :size_t,
-      'wchar_t'            => :wchar_t,
-      # <stdint.h>
-      'int8_t'             => :int8,
-      'int16_t'            => :int16,
-      'int32_t'            => :int32,
-      'int64_t'            => :int64,
-      'uint8_t'            => :uint8,
-      'uint16_t'           => :uint16,
-      'uint32_t'           => :uint32,
-      'uint64_t'           => :uint64,
-      'intptr_t'           => :pointer,
-      'uintptr_t'          => :pointer,
-      # <sys/types.h>
-      'ssize_t'            => :ssize_t,
-      'off_t'              => :off_t,
-      # all other types:
-      nil                  => :pointer,
-    }
+    TYPE_MAP = ::YAML.load(File.read(File.expand_path("../../../etc/mappings/ruby.yaml", __dir__)))
+      .transform_values(&:to_sym)
+      .freeze
 
     def finish
       puts self.render_template('ruby.erb')
@@ -68,7 +25,7 @@ module FFIDB::Exporters
       case
         when c_type.enum? then :int
         when c_type.array? then [self.param_type(c_type.array_type), c_type.array_size]
-        else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
+        else TYPE_MAP[c_type.to_s] || TYPE_MAP['void *']
       end
     end
     alias_method :struct_type, :param_type

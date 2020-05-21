@@ -8,52 +8,8 @@ module FFIDB::Exporters
   #
   # @see https://docs.python.org/3/library/ctypes.html
   class Python < FFIDB::Exporter
-    # @see https://docs.python.org/3/library/ctypes.html
-    TYPE_MAP = {
-      'void'               => :None,
-      # standard signed-integer types:
-      'char'               => :char,
-      'short'              => :short,
-      'int'                => :int,
-      'long'               => :long,
-      'long long'          => :longlong,
-      # standard unsigned-integer types:
-      'unsigned char'      => :ubyte,
-      'unsigned short'     => :ushort,
-      'unsigned int'       => :uint,
-      'unsigned long'      => :ulong,
-      'unsigned long long' => :ulonglong,
-      # standard floating-point types:
-      'float'              => :float,
-      'double'             => :double,
-      'long double'        => :longdouble,
-      # standard character-sequence types:
-      'char *'             => :char_p,
-      'const char *'       => :char_p,
-      # <stdarg.h>
-      'va_list'            => :void_p,
-      # <stdbool.h>
-      '_Bool'              => :bool,
-      # <stddef.h>
-      'size_t'             => :size_t,
-      'wchar_t'            => :wchar_t,
-      # <stdint.h>
-      'int8_t'             => :int8,
-      'int16_t'            => :int16,
-      'int32_t'            => :int32,
-      'int64_t'            => :int64,
-      'uint8_t'            => :uint8,
-      'uint16_t'           => :uint16,
-      'uint32_t'           => :uint32,
-      'uint64_t'           => :uint64,
-      'intptr_t'           => :void_p,
-      'uintptr_t'          => :void_p,
-      # <sys/types.h>
-      'ssize_t'            => :ssize_t,
-      'off_t'              => :size_t, # TODO: https://stackoverflow.com/q/43671524
-      # all other types:
-      nil                  => :void_p,
-    }
+    TYPE_MAP = ::YAML.load(File.read(File.expand_path("../../../etc/mappings/python.yaml", __dir__)))
+      .freeze
 
     def finish
       puts self.render_template('python.erb')
@@ -68,9 +24,9 @@ module FFIDB::Exporters
       case
         when c_type.enum? then 'ctypes.c_int'
         when c_type.array? then [self.param_type(c_type.array_type), '*', c_type.array_size].join(' ')
-        else case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
-          when :None then py_type.to_s
-          else "ctypes.c_#{py_type}"
+        else case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP['void *']
+          when 'None' then py_type
+          else "ctypes.#{py_type}"
         end
       end
     end

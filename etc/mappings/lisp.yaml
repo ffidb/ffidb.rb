@@ -1,0 +1,35 @@
+# See: https://common-lisp.net/project/cffi/manual/html_node/Foreign-Types.html
+---
+_Bool: bool
+char *: string
+char: char
+const char *: string
+double: double
+float: float
+int16_t: int16
+int32_t: int32
+int64_t: int64
+int8_t: int8
+int: int
+intptr_t: pointer
+long double: long-double
+long long: llong
+long: long
+off_t: ulong  # TODO
+short: short
+size_t: size-t
+ssize_t: long  # TODO
+uint16_t: uint16
+uint32_t: uint32
+uint64_t: uint64
+uint8_t: uint8
+uintptr_t: pointer
+unsigned char: uchar
+unsigned int: uint
+unsigned long long: ullong
+unsigned long: ulong
+unsigned short: ushort
+va_list: pointer
+void *: pointer
+void: void
+wchar_t: int  # TODO: https://stackoverflow.com/a/13510080

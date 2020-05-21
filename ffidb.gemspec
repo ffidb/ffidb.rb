@@ -21,7 +21,9 @@ Gem::Specification.new do |gem|
 
   gem.platform           = Gem::Platform::RUBY
   gem.files              = %w(AUTHORS CHANGES.md CREDITS.md README.md UNLICENSE VERSION) +
-                           Dir.glob('etc/templates/*.erb') + Dir.glob('lib/**/*.rb')
+                           Dir.glob('etc/mappings/*.yaml') + 
+                           Dir.glob('etc/templates/*.erb') +
+                           Dir.glob('lib/**/*.rb')
   gem.bindir             = %q(bin)
   gem.executables        = %w(ffidb)
   gem.require_paths      = %w(lib)

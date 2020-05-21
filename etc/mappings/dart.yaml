@@ -1,0 +1,35 @@
+# See: https://api.dart.dev/dev/dart-ffi/dart-ffi-library.html
+---
+_Bool: Int8                  # TODO
+char *: Pointer<Int8>        # TODO: Utf8
+char: Int8
+const char *: Pointer<Int8>  # TODO: Utf8
+double: Double
+float: Float
+int16_t: Int16
+int32_t: Int32
+int64_t: Int64
+int8_t: Int8
+int: Int32                   # TODO: https://github.com/dart-lang/sdk/issues/36140
+intptr_t: IntPtr
+long double:                 # not supported
+long long: Int64
+long: Int64                  # TODO: https://github.com/dart-lang/sdk/issues/36140
+off_t: Uint64                # TODO: https://github.com/dart-lang/sdk/issues/36140
+short: Int16
+size_t: Uint64               # TODO: https://github.com/dart-lang/sdk/issues/36140
+ssize_t: Int64               # TODO: https://github.com/dart-lang/sdk/issues/36140
+uint16_t: Uint16
+uint32_t: Uint32
+uint64_t: Uint64
+uint8_t: Uint8
+uintptr_t: IntPtr
+unsigned char: Uint8
+unsigned int: Uint32         # TODO: https://github.com/dart-lang/sdk/issues/36140
+unsigned long long: Uint64
+unsigned long: Uint64        # TODO: https://github.com/dart-lang/sdk/issues/36140
+unsigned short: Uint16
+va_list: Pointer<Void>
+void *: Pointer<Void>
+void: Void
+wchar_t: Int32               # TODO: https://github.com/dart-lang/sdk/issues/36140

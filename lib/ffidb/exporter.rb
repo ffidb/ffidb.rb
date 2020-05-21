@@ -2,6 +2,7 @@
 
 #require 'erb'
 require 'tilt' # https://rubygems.org/gems/tilt
+require 'yaml'
 
 module FFIDB
   class Exporter

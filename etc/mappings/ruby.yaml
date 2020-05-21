@@ -1,0 +1,35 @@
+# See: https://github.com/ffi/ffi/wiki/Types
+---
+_Bool: bool
+char *: string
+char: char
+const char *: string
+double: double
+float: float
+int16_t: int16
+int32_t: int32
+int64_t: int64
+int8_t: int8
+int: int
+intptr_t: pointer
+long double: long_double
+long long: long_long
+long: long
+off_t: off_t
+short: short
+size_t: size_t
+ssize_t: ssize_t
+uint16_t: uint16
+uint32_t: uint32
+uint64_t: uint64
+uint8_t: uint8
+uintptr_t: pointer
+unsigned char: uchar
+unsigned int: uint
+unsigned long long: ulong_long
+unsigned long: ulong
+unsigned short: ushort
+va_list: pointer
+void *: pointer
+void: void
+wchar_t: wchar_t
