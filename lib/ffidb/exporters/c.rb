@@ -64,7 +64,7 @@ module FFIDB::Exporters
       puts (self.options[:semicolon] == false ? '' : ';')
     end
 
-    private
+    protected
 
     def symbol_indent
       self.class.const_get(:SYMBOL_INDENT)

@@ -357,7 +357,7 @@ class CLI < Thor
     exit error.respond_to?(:exit_code) ? error.exit_code : EX_SOFTWARE
   end
 
-  private
+  protected
 
   def check_registry_exists!
     registry_path = FFIDB::Registry.default_path

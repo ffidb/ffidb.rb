@@ -186,7 +186,7 @@ module FFIDB
       )
     end
 
-    private
+    protected
 
     ##
     # @param  [String, #to_s] function_name

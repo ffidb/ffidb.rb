@@ -104,7 +104,7 @@ module FFIDB
 
     def close() end
 
-    private
+    protected
 
     def puts(*args)
       @stream.puts *args
