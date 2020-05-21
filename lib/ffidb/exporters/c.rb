@@ -9,36 +9,11 @@ module FFIDB::Exporters
     SYMBOL_INDENT    = 0
     EXTERN_QUALIFIER = 'extern'
 
-    def begin
-      puts "// #{FFIDB.header}" if self.header?
-      puts if self.header?
-      puts "#include <stdarg.h>    // for va_list"
-      puts "#include <stdbool.h>   // for _Bool"
-      puts "#include <stddef.h>    // for size_t, wchar_t"
-      puts "#include <stdint.h>    // for {,u}int*_t"
-      puts "#include <sys/types.h> // for off_t, ssize_t"
+    def finish
+      puts self.render_template('c.erb')
     end
 
-    def begin_library(library)
-      puts
-      puts "// #{library.name} API"
-    end
-
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      print ' '*self.symbol_indent if self.symbol_indent.nonzero?
-      puts "enum #{enum.name} {}" # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      print ' '*self.symbol_indent if self.symbol_indent.nonzero?
-      puts "struct #{struct.name} {}" # TODO
-    end
-
-    def export_function(function, **kwargs)
+    def _export_function(function, **kwargs)
       parameters = function.parameters.each_value.map do |p|
         p_type = case
           when p.type.function_pointer?

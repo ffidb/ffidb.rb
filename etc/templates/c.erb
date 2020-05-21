@@ -1,0 +1,44 @@
+<% if header? %>
+// <%= FFIDB.header %>
+
+<% end %>
+#include <stdarg.h>    // for va_list
+#include <stdbool.h>   // for _Bool
+#include <stddef.h>    // for size_t, wchar_t
+#include <stdint.h>    // for {,u}int*_t
+#include <sys/types.h> // for off_t, ssize_t
+<% for library in @libraries %>
+
+// <%= library.name %> API
+<% for enum in @enums[library] || [] %>
+
+<% if enum.comment %>
+// <%= enum.comment %>
+<% end %>
+enum <%= enum.name %> {
+<% for name, value in enum.values || {} %>
+  <%= name %> = <%= value %>,
+<% end %>
+};
+<% end %>
+<% for struct in @structs[library] || [] %>
+
+<% if struct.comment %>
+// <%= struct.comment %>
+<% end %>
+struct <%= struct.name %> {
+<% for name, type in struct.fields || {} %>
+  <%= type %> <%= name %>;
+<% end %>
+};
+<% end %>
+<% for function in @functions[library] || [] %>
+
+<% if function.comment %>
+// <%= function.comment %>
+<% end %>
+extern <%= function.type %> <%= function.name %>(<%=
+  function.parameters.each_value.map { |p| "#{p.type} #{p.name}" }.join(', ')
+%>);
+<% end %>
+<% end %>
