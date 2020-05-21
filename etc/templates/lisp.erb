@@ -1,0 +1,45 @@
+<% if header? %>
+; <%= FFIDB.header %>
+
+<% end %>
+(asdf:load-system :cffi)
+<% for library in @libraries %>
+<% if @functions[library] %>
+
+(cffi:define-foreign-library <%= library.name %>
+  (t (:default "<%= dlopen_paths_for(library).first %>")))
+
+(cffi:use-foreign-library <%= library.name %>)
+<% end %>
+<% for enum in @enums[library] || [] %>
+
+<% if enum.comment %>
+;; <%= enum.comment %>
+<% end %>
+(cffi:defcenum <%= enum.name %>
+<% for name, value in enum.values || {} %>
+  (:<%= name %> <%= value %>)
+<% end %>
+)
+<% end %>
+<% for struct in @structs[library] || [] %>
+
+<% if struct.comment %>
+;; <%= struct.comment %>
+<% end %>
+(cffi:defcstruct <%= struct.name %>
+<% for name, type in struct.fields || {} %>
+  (<%= name %> <%= struct_type(type).map(&:inspect).join(' ') %>)
+<% end %>
+)
+<% end %>
+<% for function in @functions[library] || [] %>
+
+<% if function.comment %>
+;; <%= function.comment %>
+<% end %>
+(cffi:defcfun "<%= function.name %>" <%= param_type(function.type).inspect %> <%=
+  function.parameters.each_value.map { |p| "(#{p.name} #{param_type(p.type).inspect})" }.join(' ')
+%>)
+<% end %>
+<% end %>

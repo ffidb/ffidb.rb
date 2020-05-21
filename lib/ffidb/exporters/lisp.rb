@@ -55,54 +55,26 @@ module FFIDB::Exporters
       nil                  => :pointer,
     }
 
-    def begin
-      puts "; #{FFIDB.header}" if self.header?
-      puts if self.header?
-      @package = self.options[:module] # TODO: use as package name
-      puts "(asdf:load-system :cffi)"
-    end
-
-    def begin_library(library)
-      @library = library
-      soname = self.dlopen_paths_for(library).first # FIXME
-      puts
-      puts <<~EOS
-      (cffi:define-foreign-library #{@library.name}
-        (t (:default "#{soname}")))
-
-      (cffi:use-foreign-library #{@library.name})
-      EOS
-    end
-
-    def export_typedef(typedef, **kwargs)
-      # TODO
-    end
-
-    def export_enum(enum, **kwargs)
-      puts
-      puts "(cffi:defcenum #{enum.name})" # TODO
-    end
-
-    def export_struct(struct, **kwargs)
-      puts
-      puts "(cffi:defcstruct #{struct.name})" # TODO
-    end
-
-    def export_function(function, **kwargs)
-      parameters = function.parameters.each_value.map { |p| "(#{p.name} :#{cffi_type(p.type)})" }
-      delimiter = parameters.empty? ? '' : ' '
-      puts
-      puts <<~EOS
-      (cffi:defcfun "#{function.name}" :#{cffi_type(function.type)}#{delimiter}#{parameters.join(' ')})
-      EOS
+    def finish
+      puts self.render_template('lisp.erb')
     end
 
     protected
 
     ##
     # @param  [FFIDB::Type] c_type
-    # @return [Symbol]
-    def cffi_type(c_type)
+    # @return [#inspect]
+    def struct_type(c_type)
+      case
+        when c_type.array? then [c_type.array_type.to_s.to_sym, :count, c_type.array_size]
+        else [self.param_type(c_type)]
+      end
+    end
+
+    ##
+    # @param  [FFIDB::Type] c_type
+    # @return [#inspect]
+    def param_type(c_type)
       case
         when c_type.enum? then :int
         else TYPE_MAP[c_type.to_s] || TYPE_MAP[nil]
