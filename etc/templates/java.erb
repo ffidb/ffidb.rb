@@ -30,10 +30,16 @@ public interface <%= library.interface_name %> extends Library {
   <% if struct.comment %>
   // <%= struct.comment %>
   <% end %>
+  <% if struct.opaque? %>
+  @FieldOrder({ "_opaque" })
+  public static class <%= struct.name %> extends Structure {
+    public byte _opaque;
+  <% else %>
   @FieldOrder({ <%= (struct.fields || {}).keys.map(&:to_s).map(&:inspect).join(', ') %> })
   public static class <%= struct.name %> extends Structure {
   <% for name, type in struct.fields || {} %>
     public <%= struct_type(type) %> <%= name %>; // <%= type %>
+  <% end %>
   <% end %>
   }
 <% end %>

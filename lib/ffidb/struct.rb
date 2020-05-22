@@ -19,6 +19,10 @@ module FFIDB
     def struct?() return true end
 
     ##
+    # @return [Boolean]
+    def opaque?() !self.fields || self.fields.empty? end
+
+    ##
     # @return [String]
     def to_s
       "struct #{self.name}"
@@ -30,7 +34,7 @@ module FFIDB
       {
         name: self.name.to_s,
         comment: self.comment,
-        fields: self.fields&.empty? ? nil : self.fields&.transform_values { |t| t.to_s },
+        fields: self.opaque? ? nil : self.fields&.transform_values { |t| t.to_s },
       }.delete_if { |k, v| v.nil? }
     end
   end # Struct

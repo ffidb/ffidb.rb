@@ -25,11 +25,15 @@ module <%= options[:module] || library.name.capitalize %>
   <% if struct.comment %>
   # <%= struct.comment %>
   <% end %>
+  <% if struct.opaque? %>
+  <%= struct.name %> = FFI::Pointer
+  <% else %>
   class <%= struct.name %> < FFI::Struct
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
     <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%= struct_type(type).inspect %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
   <% end %>
   end
+  <% end %>
 <% end %>
 <% for function in @functions[library] || [] %>
 

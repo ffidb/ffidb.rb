@@ -27,11 +27,15 @@
 <% if struct.comment %>
 ;; <%= struct.comment %>
 <% end %>
+<% if struct.opaque? %>
+(cffi:defctype <%= struct.name %> :pointer)
+<% else %>
 (cffi:defcstruct <%= struct.name %>
 <% for name, type in struct.fields || {} %>
   (<%= name %> <%= struct_type(type).map(&:inspect).join(' ') %>)
 <% end %>
 )
+<% end %>
 <% end %>
 <% for function in @functions[library] || [] %>
 

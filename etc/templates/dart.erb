@@ -27,6 +27,10 @@ abstract class <%= enum.name %> {
 <% if struct.comment %>
 /// <%= struct.comment %>
 <% end %>
+<% if struct.opaque? %>
+class <%= struct.name %> extends Struct {
+    Int8 _opaque;
+<% else %>
 class <%= struct.name %> extends Struct {
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
 <%= i.zero? ? '' : "\n" -%>
@@ -37,6 +41,7 @@ class <%= struct.name %> extends Struct {
     <% end %>
     <%= dart_struct_type(type) %> <%= name %>;
   <% end %>
+<% end %>
 }
 <% end %>
 <% for function in @functions[library] || [] %>

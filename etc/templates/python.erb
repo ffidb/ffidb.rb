@@ -30,6 +30,9 @@ import ctypes, ctypes.util
 <% if struct.comment %>
 # <%= struct.comment %>
 <% end %>
+<% if struct.opaque? %>
+<%= struct.name %> = ctypes.POINTER(ctypes.c_void)
+<% else %>
 class <%= struct.name %>(Structure):
   <% if struct.fields.nil? || struct.fields.empty? %>
     _fields_ = []
@@ -40,6 +43,7 @@ class <%= struct.name %>(Structure):
     <% end %>
     ]
   <% end %>
+<% end %>
 <% end %>
 <% for function in @functions[library] || [] %>
 
