@@ -2,12 +2,16 @@
 // <%= FFIDB.header %>
 
 <% end %>
+<% if options[:module] %>
+library <%= options[:module] %>;
+
+<% end %>
 import 'dart:ffi';
 import 'dart:io' as io;
 <% for library in @libraries %>
-<% if @functions[library] %>
+<% if library && @functions[library] %>
 
-final <%= library.name %> = DynamicLibrary.open('<%= dlopen_paths_for(library).first %>');
+final <%= library&.name || :lib %> = DynamicLibrary.open('<%= dlopen_paths_for(library).first %>');
 <% end %>
 <% for enum in @enums[library] || [] %>
 
@@ -51,7 +55,7 @@ class <%= struct.name %> extends Struct {
 <% end %>
 final <%= dart_param_type(function.type) %> Function(<%=
       function.parameters.each_value.map { |p| dart_param_type(p.type) }.join(', ')
-    %>) <%= function.name %> = <%= library.name %>
+    %>) <%= function.name %> = <%= library&.name || :lib %>
     .lookup<NativeFunction<<%= ffi_param_type(function.type) %> Function(<%=
       function.parameters.each_value.map { |p| ffi_param_type(p.type) }.join(', ')
     %>)>>('<%= function.name %>')

@@ -15,11 +15,11 @@ module FFIDB::Exporters
 
     def begin_library(library)
       @library = library
-      @json[@library.name] ||= {}
+      @json[@library&.name] ||= {}
     end
 
     def export_symbol(symbol, **kwargs)
-      @json[@library.name][symbol.name] = {kind: symbol.kind.to_s}.merge!(symbol.to_h)
+      @json[@library&.name][symbol.name] = {kind: symbol.kind.to_s}.merge!(symbol.to_h)
     end
     alias_method :export_typedef, :export_symbol
     alias_method :export_enum, :export_symbol

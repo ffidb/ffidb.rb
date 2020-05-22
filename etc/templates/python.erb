@@ -4,13 +4,13 @@
 <% end %>
 import ctypes, ctypes.util
 <% for library in @libraries %>
-<% if @functions[library] %>
+<% if library && @functions[library] %>
 
-<%= library.name %> = ctypes.CDLL(
+<%= library&.name || :lib %> = ctypes.CDLL(
 <% self.dlopen_paths_for(library).each_with_index do |library_path, i| %>
     <%= i.nonzero? ? 'or ' : '' %>ctypes.util.find_library("<%= library_path %>")
 <% end %>
-<% unless options[:library_path] %>
+<% if !options[:library_path] && library&.dlopen %>
     or "<%= library.dlopen.first %>"
 <% end %>
 )
@@ -50,7 +50,7 @@ class <%= struct.name %>(Structure):
 <% if function.comment %>
 # <%= function.comment %>
 <% end %>
-<%= function.name %> = <%= library.name %>.<%= function.name %>
+<%= function.name %> = <%= library&.name || :lib %>.<%= function.name %>
 <%= function.name %>.restype = <%= param_type(function.type) %>
 <%= function.name %>.argtypes = [<%=
   function.parameters.each_value.map { |p| param_type(p.type) }.join(', ')

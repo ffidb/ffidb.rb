@@ -65,8 +65,9 @@ module FFIDB
     def begin() end
 
     def begin_library(library)
+      @library = library
       @libraries ||= []
-      @libraries << (@library = library)
+      @libraries << library
       @typedefs ||= {}
       @enums ||= {}
       @structs ||= {}

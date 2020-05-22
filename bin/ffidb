@@ -201,6 +201,7 @@ class CLI < Thor
   option :config, aliases: '-C', banner: 'FILE', desc: "Use a library.yaml configuration FILE"
   option :define, aliases: '-D', repeatable: true, banner: 'VAR[=VAL]', desc: "Define VAR as a preprocessor symbol"
   option :include, aliases: '-I', repeatable: true, banner: 'DIRECTORY', desc: "Add DIRECTORY to the headers search path"
+  option :format, aliases: '-f', default: nil, desc: "Specify the output FORMAT (default: yaml)"
   def parse(path, *paths)
     base_directory = nil
     paths.prepend(path)
@@ -229,6 +230,7 @@ class CLI < Thor
 
     FFIDB::HeaderParser.new(base_directory: base_directory, debug: verbose? || debug?).tap do |parser|
       # Parse a library.yaml configuration file, if given:
+      library = nil
       if config_path = self.options[:config]
         config_path = Pathname(config_path)
         raise Errno::ENOENT, config_path.to_s unless config_path.exist?
@@ -254,7 +256,8 @@ class CLI < Thor
         parser.add_include_path! Pathname(dir_path).expand_path
       end
 
-      FFIDB::Exporter.for(:yaml).new(**options).emit do |export|
+      FFIDB::Exporter.for(self.options[:format] || :yaml).new(**options).emit do |export|
+        export.begin_library(library)
         paths.each do |path|
           header = parser.parse_header(path) do |exception|
             case exception
@@ -267,6 +270,7 @@ class CLI < Thor
           end
           export.export_header(header)
         end
+        export.finish_library
       end
     end
   rescue => error

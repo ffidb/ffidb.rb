@@ -13,7 +13,7 @@ module FFIDB::Exporters
     end
 
     def export_symbol(symbol, **kwargs)
-      puts [@library.name, symbol.kind, symbol.name].join(DELIMITER)
+      puts [@library&.name, symbol.kind, symbol.name].join(DELIMITER)
     end
     alias_method :export_typedef, :export_symbol
     alias_method :export_enum, :export_symbol

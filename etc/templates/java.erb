@@ -10,9 +10,9 @@ import com.sun.jna.Structure.FFIType.size_t;
 import com.sun.jna.platform.linux.XAttr.ssize_t;
 <% for library in @libraries %>
 
-public interface <%= library.interface_name %> extends Library {
-<% if @functions[library] %>
-  <%= library.interface_name %> INSTANCE = (<%= library.interface_name %>)Native.load("<%= dlopen_paths_for(library).first %>", <%= library.interface_name %>.class);
+public interface <%= library&.interface_name || :FFI %> extends Library {
+<% if library && @functions[library] %>
+  <%= library&.interface_name || :FFI %> INSTANCE = (<%= library&.interface_name || :FFI %>)Native.load("<%= dlopen_paths_for(library).first %>", <%= library&.interface_name || :FFI %>.class);
 <% end %>
 <% for enum in @enums[library] || [] %>
 
@@ -52,5 +52,5 @@ public interface <%= library.interface_name %> extends Library {
   function.parameters.each_value.map { |p| [param_type(p.type), p.name].join(' ') }.join(', ')
 %>);
 <% end %>
-} // <%= library.interface_name %>
+} // <%= library&.interface_name || :FFI %>
 <% end %>

@@ -8,8 +8,10 @@
 #include <stdint.h>    // for {,u}int*_t
 #include <sys/types.h> // for off_t, ssize_t
 <% for library in @libraries %>
+<% if library %>
 
 // <%= library.name %> API
+<% end %>
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>

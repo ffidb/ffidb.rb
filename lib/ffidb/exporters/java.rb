@@ -12,8 +12,10 @@ module FFIDB::Exporters
       .freeze
 
     def begin_library(library)
-      interface_name = self.options[:module] || library.name.capitalize
-      library.define_singleton_method(:interface_name) { interface_name }
+      if library
+        interface_name = self.options[:module] || library.name.capitalize
+        library.define_singleton_method(:interface_name) { interface_name }
+      end
       super(library)
     end
 

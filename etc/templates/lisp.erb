@@ -4,12 +4,12 @@
 <% end %>
 (asdf:load-system :cffi)
 <% for library in @libraries %>
-<% if @functions[library] %>
+<% if library && @functions[library] %>
 
-(cffi:define-foreign-library <%= library.name %>
+(cffi:define-foreign-library <%= library&.name || :lib %>
   (t (:default "<%= dlopen_paths_for(library).first %>")))
 
-(cffi:use-foreign-library <%= library.name %>)
+(cffi:use-foreign-library <%= library&.name || :lib %>)
 <% end %>
 <% for enum in @enums[library] || [] %>
 

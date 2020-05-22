@@ -9,7 +9,7 @@
 #include <sys/types.h> // for off_t, ssize_t
 <% for library in @libraries %>
 
-namespace <%= self.options[:module] || library.name %> {
+namespace <%= self.options[:module] || library&.name || :lib %> {
 <% for enum in @enums[library] || [] %>
 
   <% if enum.comment %>
@@ -41,5 +41,5 @@ namespace <%= self.options[:module] || library.name %> {
     function.parameters.each_value.map { |p| "#{p.type} #{p.name}" }.join(', ')
   %>);
 <% end %>
-} // <%= self.options[:module] || library.name %>
+} // <%= self.options[:module] || library&.name || :lib %>
 <% end %>
