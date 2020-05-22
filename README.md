@@ -18,6 +18,22 @@ After installation, download and initialize the FFI DB registry as follows:
 
 Your local FFI DB registry is located at the path `$HOME/.ffidb/`.
 
+Features
+--------
+
+### Code generation
+
+| ID      | Language    | typedefs | enums | structs | unions | functions |
+| :------ | :---------- | :------- | :---- | :------ | :----- | :-------- |
+| c       | C           |          | ✔     |  ✔      |        |  ✔        | 
+| c++     | C++         |          | ✔     |  ✔      |        |  ✔        | 
+| dart    | Dart        |          | ✔     |  ✔      |        |  ✔        | 
+| go      | Go          |          | ✔     |  ✔      |        |  ✔        | 
+| java    | Java        |          | ✔     |  ✔      |        |  ✔        | 
+| lisp    | Common Lisp |          | ✔     |  ✔      |        |  ✔        | 
+| python  | Python      |          | ✔     |  ✔      |        |  ✔        | 
+| ruby    | Ruby        |          | ✔     |  ✔      |        |  ✔        | 
+
 Examples (API)
 --------------
 
