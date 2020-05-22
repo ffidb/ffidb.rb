@@ -16,7 +16,7 @@ final <%= library&.name || :lib %> = DynamicLibrary.open('<%= dlopen_paths_for(l
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>
-/// <%= enum.comment %>
+<%= format_comment(enum.comment, '///') %>
 <% end %>
 abstract class <%= enum.name %> {
   <%= enum.name %>._();
@@ -29,7 +29,7 @@ abstract class <%= enum.name %> {
 <% for struct in @structs[library] || [] %>
 
 <% if struct.comment %>
-/// <%= struct.comment %>
+<%= format_comment(struct.comment, '///') %>
 <% end %>
 <% if struct.opaque? %>
 class <%= struct.name %> extends Struct {
@@ -51,7 +51,7 @@ class <%= struct.name %> extends Struct {
 <% for function in @functions[library] || [] %>
 
 <% if function.comment %>
-/// <%= function.comment %>
+<%= format_comment(function.comment, '///') %>
 <% end %>
 final <%= dart_param_type(function.type) %> Function(<%=
       function.parameters.each_value.map { |p| dart_param_type(p.type) }.join(', ')

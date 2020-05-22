@@ -18,7 +18,7 @@ import ctypes, ctypes.util
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>
-# <%= enum.comment %>
+<%= format_comment(enum.comment, '#') %>
 <% end %>
 <%= enum.name %> = ctypes.c_int
 <% for name, value in enum.values || {} %>
@@ -28,7 +28,7 @@ import ctypes, ctypes.util
 <% for struct in @structs[library] || [] %>
 
 <% if struct.comment %>
-# <%= struct.comment %>
+<%= format_comment(struct.comment, '#') %>
 <% end %>
 <% if struct.opaque? %>
 <%= struct.name %> = ctypes.POINTER(ctypes.c_void)
@@ -48,7 +48,7 @@ class <%= struct.name %>(Structure):
 <% for function in @functions[library] || [] %>
 
 <% if function.comment %>
-# <%= function.comment %>
+<%= format_comment(function.comment, '#') %>
 <% end %>
 <%= function.name %> = <%= library&.name || :lib %>.<%= function.name %>
 <%= function.name %>.restype = <%= param_type(function.type) %>

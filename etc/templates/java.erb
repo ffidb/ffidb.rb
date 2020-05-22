@@ -16,9 +16,9 @@ public interface <%= library&.interface_name || :FFI %> extends Library {
 <% end %>
 <% for enum in @enums[library] || [] %>
 
-<% if enum.comment %>
-  // <%= enum.comment %>
-<% end %>
+  <% if enum.comment %>
+<%= format_comment(enum.comment, '  //') %>
+  <% end %>
   public static class <%= enum.name %> {
   <% for name, value in enum.values || {} %>
     public static final int <%= name %> = <%= value %>;
@@ -28,7 +28,7 @@ public interface <%= library&.interface_name || :FFI %> extends Library {
 <% for struct in @structs[library] || [] %>
 
   <% if struct.comment %>
-  // <%= struct.comment %>
+<%= format_comment(struct.comment, '  //') %>
   <% end %>
   <% if struct.opaque? %>
   @FieldOrder({ "_opaque" })
@@ -46,7 +46,7 @@ public interface <%= library&.interface_name || :FFI %> extends Library {
 <% for function in @functions[library] || [] %>
 
   <% if function.comment %>
-  // <%= function.comment %>
+<%= format_comment(function.comment, '  //') %>
   <% end %>
   <%= param_type(function.type) %> <%= function.name %>(<%=
   function.parameters.each_value.map { |p| [param_type(p.type), p.name].join(' ') }.join(', ')

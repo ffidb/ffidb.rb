@@ -13,7 +13,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <% for enum in @enums[library] || [] %>
 
   <% if enum.comment %>
-  # <%= enum.comment %>
+<%= format_comment(enum.comment, '  #') %>
   <% end %>
   <%= enum.name %> = :int
   <% for name, value in enum.values || {} %>
@@ -23,7 +23,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <% for struct in @structs[library] || [] %>
 
   <% if struct.comment %>
-  # <%= struct.comment %>
+<%= format_comment(struct.comment, '  #') %>
   <% end %>
   <% if struct.opaque? %>
   <%= struct.name %> = FFI::Pointer
@@ -38,7 +38,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <% for function in @functions[library] || [] %>
 
   <% if function.comment %>
-  # <%= function.comment %>
+<%= format_comment(function.comment, '  #') %>
   <% end %>
   attach_function :<%= function.name %>, [<%=
     function.parameters.each_value.map { |p| param_type(p.type).inspect }.join(', ')

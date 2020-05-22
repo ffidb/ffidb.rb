@@ -17,7 +17,7 @@
 <% for enum in @enums[library] || [] %>
 
 <% if enum.comment %>
-// <%= enum.comment %>
+<%= format_comment(enum.comment, '//') %>
 <% end %>
 enum <%= enum.name %> {
 <% for name, value in enum.values || {} %>
@@ -28,7 +28,7 @@ enum <%= enum.name %> {
 <% for struct in @structs[library] || [] %>
 
 <% if struct.comment %>
-// <%= struct.comment %>
+<%= format_comment(struct.comment, '//') %>
 <% end %>
 struct <%= struct.name %> {
 <% for name, type in struct.fields || {} %>
@@ -39,7 +39,7 @@ struct <%= struct.name %> {
 <% for function in @functions[library] || [] %>
 
 <% if function.comment %>
-// <%= function.comment %>
+<%= format_comment(function.comment, '//') %>
 <% end %>
 extern <%= function.type %> <%= function.name %>(<%=
   function.parameters.each_value.map { |p| "#{p.type} #{p.name}" }.join(', ')

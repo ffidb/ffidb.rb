@@ -117,6 +117,11 @@ module FFIDB
 
     protected
 
+    def format_comment(comment, prefix)
+      prefix = prefix + ' '
+      comment.each_line.map(&:strip).map { |s| s.prepend(prefix) }.join("\n")
+    end
+
     def puts(*args)
       @stream.puts *args
     end
