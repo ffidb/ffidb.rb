@@ -1,6 +1,7 @@
 # This is free and unencumbered software released into the public domain.
 
 require_relative 'library_parser'
+require_relative 'release'
 require_relative 'symbol_table'
 
 require 'pathname'
@@ -52,6 +53,15 @@ module FFIDB
     ##
     # @return [String]
     def soname() self.objects&.first end
+
+    ##
+    # @yield  [release]
+    # @yieldparam [release] Release
+    # @return [Enumerator]
+    def each_release(&block)
+      return self.to_enum(:each_release) unless block_given?
+      # TODO
+    end
 
     ##
     # @yield  [typedef]
