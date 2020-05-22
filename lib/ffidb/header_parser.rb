@@ -107,7 +107,19 @@ module FFIDB
                   header.enums << self.parse_enum(declaration)
                 end
               when :cursor_struct
-                # TODO: self.parse_struct(declaration)
+                struct_name = declaration.spelling
+                if struct_name && !struct_name.empty?
+                  if (struct = self.parse_struct(declaration))
+                    header.structs << struct
+                  end
+                end
+              when :cursor_union
+                union_name = declaration.spelling
+                if union_name && !union_name.empty?
+                  if (union = self.parse_union(declaration))
+                    header.unions << union
+                  end
+                end
               when :cursor_function
                 function_name = declaration.spelling
                 if self.consider_function?(function_name)
@@ -130,14 +142,20 @@ module FFIDB
     def parse_typedef(declaration, &block)
       typedef_name = declaration.spelling
       typedef_type = nil
-      declaration.visit_children do |child_declaration, _|
-        case child_declaration.kind
+      declaration.visit_children do |node, _|
+        node_name = node.spelling
+        case node.kind
           when :cursor_type_ref
-            # TODO
+            typedef_type = node_name
           when :cursor_enum_decl
-            enum_name = child_declaration.spelling
-            typedef_type = "enum #{enum_name}" if enum_name && !enum_name.empty?
-            yield self.parse_enum(child_declaration, typedef_name: typedef_name)
+            typedef_type = "enum #{node_name}".rstrip
+            yield self.parse_enum(node, typedef_name: typedef_name)
+          when :cursor_struct
+            typedef_type = "struct #{node_name}".rstrip
+            yield self.parse_struct(node, typedef_name: typedef_name)
+          when :cursor_union
+            typedef_type = "union #{node_name}".rstrip
+            #yield self.parse_union(node, typedef_name: typedef_name) # TODO
         end
         :continue # visit the next sibling
       end
@@ -146,34 +164,58 @@ module FFIDB
 
     ##
     # @param  [FFI::Clang::Cursor] declaration
+    # @param  [String] typedef_name
     # @return [Enum]
     def parse_enum(declaration, typedef_name: nil)
       enum_name = declaration.spelling
-      enum = FFIDB::Enum.new(enum_name && !enum_name.empty? ? enum_name : typedef_name)
-      declaration.visit_children do |child_declaration, _|
-        case child_declaration.kind
-          when :cursor_enum_constant_decl
-            k = child_declaration.spelling
-            v = child_declaration.enum_value
-            enum.values[k] = v
+      enum_name = typedef_name if enum_name.empty?
+      FFIDB::Enum.new(enum_name).tap do |enum|
+        declaration.visit_children do |node, _|
+          case node.kind
+            when :cursor_enum_constant_decl
+              k = node.spelling
+              v = node.enum_value
+              enum.values[k] = v
+          end
+          :continue # visit the next sibling
         end
-        :continue # visit the next sibling
       end
-      enum
     end
 
     ##
     # @param  [FFI::Clang::Cursor] declaration
+    # @param  [String] typedef_name
     # @return [Struct]
-    def parse_struct(declaration)
-      # TODO
+    def parse_struct(declaration, typedef_name: nil)
+      struct_name = declaration.spelling
+      struct_name = typedef_name if struct_name.empty?
+      FFIDB::Struct.new(struct_name).tap do |struct|
+        declaration.visit_children do |node, _|
+          case node.kind
+            when :cursor_field_decl
+              field_name = node.spelling
+              field_type = nil
+              node.visit_children do |node, _|
+                case node.kind
+                  when :cursor_type_ref
+                    field_type = node.spelling
+                    :break
+                  else :continue
+                end
+              end
+              struct.fields[field_name.to_sym] = Type.for(field_type)
+          end
+          :continue # visit the next sibling
+        end
+      end
     end
 
     ##
     # @param  [FFI::Clang::Cursor] declaration
+    # @param  [String] typedef_name
     # @return [Union]
-    def parse_union(declaration)
-      # TODO
+    def parse_union(declaration, typedef_name: nil)
+      # TODO: parse union declarations
     end
 
     ##
@@ -189,11 +231,11 @@ module FFIDB
         definition: nil, # set in #parse_header()
         comment: comment && !(comment.empty?) ? comment : nil,
       )
-      declaration.visit_children do |child_declaration, _|
-        case child_declaration.kind
+      declaration.visit_children do |node, _|
+        case node.kind
           when :cursor_parm_decl
             default_name = "_#{function.parameters.size + 1}"
-            parameter = self.parse_parameter(child_declaration, default_name: default_name)
+            parameter = self.parse_parameter(node, default_name: default_name)
             function.parameters[parameter.name.to_sym] = parameter
         end
         :continue # visit the next sibling
