@@ -14,6 +14,7 @@ module FFIDB::Exporters
     def export_symbol(symbol, **kwargs)
       @counter ||= 0
       puts unless @counter.zero?
+      puts "# #{symbol.instance_variable_get(:@debug)}" if self.debug? && symbol.instance_variable_get(:@debug)
       puts symbol.to_yaml
       @counter += 1
     end

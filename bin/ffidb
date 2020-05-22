@@ -254,23 +254,18 @@ class CLI < Thor
         parser.add_include_path! Pathname(dir_path).expand_path
       end
 
-      counter = 0
-      paths.each do |path|
-        header = parser.parse_header(path) do |exception|
-          case exception
-            when FFIDB::ParseError
-              warn "#{$0}: #{set_color(exception.to_s, :red)}" unless quiet?
-            when FFIDB::ParseWarning
-              warn "#{$0}: #{set_color(exception.to_s, :yellow)}" if verbose?
-            else raise exception
+      FFIDB::Exporter.for(:yaml).new(**options).emit do |export|
+        paths.each do |path|
+          header = parser.parse_header(path) do |exception|
+            case exception
+              when FFIDB::ParseError
+                warn "#{$0}: #{set_color(exception.to_s, :red)}" unless quiet?
+              when FFIDB::ParseWarning
+                warn "#{$0}: #{set_color(exception.to_s, :yellow)}" if verbose?
+              else raise exception
+            end
           end
-        end
-        header.functions.sort.each do |function|
-          puts unless counter.zero?
-          counter += 1
-          p function if debug?
-          puts '# ' + function.instance_variable_get(:@debug) if parser.debug
-          puts function.to_yaml
+          export.export_header(header)
         end
       end
     end

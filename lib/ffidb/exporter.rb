@@ -74,6 +74,14 @@ module FFIDB
       @functions ||= {}
     end
 
+    def export_header(header)
+      header.typedefs.sort.each { |typedef| self.export_typedef(typedef) }
+      header.enums.sort.each { |enum| self.export_enum(enum) }
+      header.structs.sort.each { |struct| self.export_struct(struct) }
+      header.unions.sort.each { |union| self.export_union(union) }
+      header.functions.sort.each { |function| self.export_function(function) }
+    end
+
     def export_symbol(symbol, disabled: nil)
       self.__send__("export_#{symbol.kind}", symbol, disabled: disabled)
     end
