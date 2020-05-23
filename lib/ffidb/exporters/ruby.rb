@@ -8,9 +8,7 @@ module FFIDB::Exporters
   #
   # @see https://github.com/ffi/ffi/wiki
   class Ruby < FFIDB::Exporter
-    TYPE_MAP = ::YAML.load(File.read(File.expand_path("../../../etc/mappings/ruby.yaml", __dir__)))
-      .transform_values(&:to_sym)
-      .freeze
+    TYPE_MAP = 'ruby.yaml'
 
     def finish
       puts self.render_template('ruby.erb')
@@ -20,24 +18,19 @@ module FFIDB::Exporters
 
     ##
     # @param  [FFIDB::Type] c_type
-    # @return [#inspect]
+    # @return [String]
     def struct_type(c_type)
       case
-        when c_type.array? then [self.param_type(c_type.array_type), c_type.array_size]
-        else self.param_type(c_type)
+        when c_type.array? then [self.param_type(c_type.array_type), c_type.array_size].inspect
+        else super(c_type)
       end
     end
 
     ##
     # @param  [FFIDB::Type] c_type
-    # @return [#inspect]
+    # @return [String]
     def param_type(c_type)
-      case
-        when c_type.enum? then TYPE_MAP['int']
-        when c_type.pointer? then TYPE_MAP['void *']
-        when c_type.array? then TYPE_MAP['void *']
-        else TYPE_MAP[c_type.to_s] || TYPE_MAP['int']
-      end
+      ':' << super(c_type)
     end
   end # Ruby
 end # FFIDB::Exporters

@@ -32,7 +32,7 @@
 <% else %>
 (cffi:defcstruct <%= struct.name %>
 <% for name, type in struct.fields || {} %>
-  (<%= name %> <%= struct_type(type).map(&:inspect).join(' ') %>)
+  (<%= name %> <%= struct_type(type) %>)
 <% end %>
 )
 <% end %>
@@ -42,8 +42,8 @@
 <% if function.comment %>
 <%= format_comment(function.comment, ';;') %>
 <% end %>
-(cffi:defcfun "<%= function.name %>" <%= param_type(function.type).inspect %> <%=
-  function.parameters.each_value.map { |p| "(#{p.name} #{param_type(p.type).inspect})" }.join(' ')
+(cffi:defcfun "<%= function.name %>" <%= param_type(function.type) %><%=
+  function.parameters.each_value.map { |p| " (#{p.name} #{param_type(p.type)})" }.join
 %>)
 <% end %>
 <% end %>

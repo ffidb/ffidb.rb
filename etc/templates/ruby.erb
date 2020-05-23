@@ -30,7 +30,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
   <% else %>
   class <%= struct.name %> < FFI::Struct
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
-    <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%= struct_type(type).inspect %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
+    <%= i.zero? ? 'layout' : ' '*6 %> :<%= name %>, <%= struct_type(type) %><%= (i == (struct.fields || {}).size-1) ? '' : ',' %>  # <%= type %>
   <% end %>
   end
   <% end %>
@@ -41,8 +41,8 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <%= format_comment(function.comment, '  #') %>
   <% end %>
   attach_function :<%= function.name %>, [<%=
-    function.parameters.each_value.map { |p| param_type(p.type).inspect }.join(', ')
-  %>], :<%= param_type(function.type) %>
+    function.parameters.each_value.map { |p| param_type(p.type) }.join(', ')
+  %>], <%= param_type(function.type) %>
 <% end %>
 end # <%= options[:module] || library&.name&.capitalize || :FFI %>
 <% end %>

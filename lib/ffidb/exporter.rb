@@ -130,13 +130,45 @@ module FFIDB
       @stream.print *args
     end
 
+    ##
+    # @param  [FFIDB::Type] c_type
+    # @return [String]
+    def struct_type(c_type)
+      self.param_type(c_type)
+    end
+
+    ##
+    # @param  [FFIDB::Type] c_type
+    # @return [String]
+    def param_type(c_type)
+      case
+        when c_type.enum? then typemap['int']
+        when c_type.pointer? then typemap['void *']
+        when c_type.array? then typemap['void *']
+        when type = typemap[c_type.to_s] then type
+        else typemap['int'] # TODO: typedef or enum
+      end
+    end
+
+    def typemap
+      @typemap ||= self.load_typemap(self.class.const_get(:TYPE_MAP))
+    end
+
+    def load_typemap(typemap_name)
+      ::YAML.load(File.read(self.path_to_typemap(typemap_name))).freeze
+    end
+
+    def path_to_typemap(typemap_name)
+      File.expand_path("../../etc/mappings/#{typemap_name}", __dir__)
+    end
+
     def render_template(template_name)
       #ERB.new(self.load_template(template_name)).result(binding)
       Tilt.new(self.path_to_template(template_name)).render(self)
     end
 
     def load_template(template_name)
-      File.read(self.path_to_template(template_name))
+      File.read(self.path_to_template(template_name)).freeze
     end
 
     def path_to_template(template_name)

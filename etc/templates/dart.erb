@@ -33,7 +33,8 @@ abstract class <%= enum.name %> {
 <% end %>
 <% if struct.opaque? %>
 class <%= struct.name %> extends Struct {
-    Int8 _opaque;
+    @Uint8()
+    int _opaque;
 <% else %>
 class <%= struct.name %> extends Struct {
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
