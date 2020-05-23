@@ -17,22 +17,26 @@ module FFIDB::Exporters
     protected
 
     ##
-    # @param  [FFIDB::Type] c_type
+    # @param  [Symbol, FFIDB::Type] c_type
     # @return [String]
     def struct_type(c_type)
-      case
-        when c_type.array? then [self.param_type(c_type.array_type), '*', c_type.array_size].join(' ')
-        else self.param_type(c_type)
+      case c_type
+        when Symbol then c_type.to_s  # a typedef
+        else case
+          when c_type.array? then [self.param_type(c_type.array_type), '*', c_type.array_size].join(' ')
+          else self.param_type(c_type)
+        end
       end
     end
 
     ##
-    # @param  [FFIDB::Type] c_type
+    # @param  [Symbol, FFIDB::Type] c_type
     # @return [String]
     def param_type(c_type)
-      case py_type = super(c_type)
-        when 'None' then py_type
-        else "ctypes.#{py_type}"
+      case type = super(c_type)
+        when Symbol then type.to_s  # a typedef
+        when 'None' then type
+        else "ctypes.#{type}"
       end
     end
   end # Python

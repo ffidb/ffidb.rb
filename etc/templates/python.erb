@@ -31,9 +31,9 @@ import ctypes, ctypes.util
 <%= format_comment(struct.comment, '#') %>
 <% end %>
 <% if struct.opaque? %>
-<%= struct.name %> = ctypes.POINTER(ctypes.c_void)
+<%= struct.name %> = ctypes.POINTER(ctypes.c_void_p)
 <% else %>
-class <%= struct.name %>(Structure):
+class <%= struct.name %>(ctypes.Structure):
   <% if struct.fields.nil? || struct.fields.empty? %>
     _fields_ = []
   <% else %>

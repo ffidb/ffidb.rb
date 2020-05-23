@@ -24,6 +24,23 @@ module FFIDB
     def <=>(other) self.spec <=> other.spec end
 
     ##
+    # @return [Symbol]
+    def tag
+      case self.spec.gsub(/^const /, '')
+        when 'enum', /^enum\s+/ then :enum
+        when 'struct', /^struct\s+/ then :struct
+        when 'union', /^union\s+/ then :union
+        else nil
+      end
+    end
+
+    ##
+    # @return [Symbol]
+    def name
+      self.spec.gsub(/\s*\*+$/, '').to_sym # TODO
+    end
+
+    ##
     # @return [Boolean]
     def const_qualified?
       self.spec.start_with?('const ')
@@ -50,13 +67,13 @@ module FFIDB
     ##
     # @return [Boolean]
     def enum?
-      !(self.pointer?) && self.spec.start_with?('enum ')
+      !(self.pointer?) && (self.spec == 'enum' || self.spec.start_with?('enum '))
     end
 
     ##
     # @return [Boolean]
     def struct?
-      !(self.pointer?) && (self.spec.start_with?('struct ') || self.spec.start_with?('const struct '))
+      !(self.pointer?) && (self.spec == 'struct' || self.spec.start_with?('struct ') || self.spec.start_with?('const struct '))
     end
 
     ##
@@ -181,19 +198,6 @@ module FFIDB
     end
 
     ##
-    # @return [Integer, Range, nil]
-    def sizeof
-      nil # TODO
-    end
-    alias_method :size, :sizeof
-
-    ##
-    # @return [Integer, Range, nil]
-    def alignof
-      nil # TODO
-    end
-
-    ##
     # @return [String]
     def to_s
       self.spec
@@ -209,6 +213,21 @@ module FFIDB
     # @return [String]
     def inspect
       "#{self.class}(#{self.spec.inspect})"
+    end
+
+    protected
+
+    ##
+    # @return [Integer, Range, nil]
+    def sizeof
+      nil # TODO
+    end
+    alias_method :size, :sizeof
+
+    ##
+    # @return [Integer, Range, nil]
+    def alignof
+      nil # TODO
     end
   end # Type
 end # FFIDB

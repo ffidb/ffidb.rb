@@ -26,7 +26,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <%= format_comment(struct.comment, '  #') %>
   <% end %>
   <% if struct.opaque? %>
-  <%= struct.name %> = FFI::Pointer
+  <%= struct.name %> = :pointer
   <% else %>
   class <%= struct.name %> < FFI::Struct
   <% for (name, type), i in (struct.fields || {}).each_with_index %>
@@ -41,7 +41,7 @@ module <%= options[:module] || library&.name&.capitalize || :FFI %>
 <%= format_comment(function.comment, '  #') %>
   <% end %>
   attach_function :<%= function.name %>, [<%=
-    function.parameters.each_value.map { |p| param_type(p.type) }.join(', ')
+    function.parameters.each_value.map { |param| param_type(param.type) }.join(', ')
   %>], <%= param_type(function.type) %>
 <% end %>
 end # <%= options[:module] || library&.name&.capitalize || :FFI %>

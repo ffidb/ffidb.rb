@@ -88,7 +88,8 @@ module FFIDB
     end
 
     def export_typedef(typedef, disabled: nil)
-      (@typedefs[@library] ||= []) << typedef
+      @typedefs[@library] ||= {}
+      @typedefs[@library][typedef.name] = typedef
     end
 
     def export_enum(enum, disabled: nil)
@@ -96,15 +97,15 @@ module FFIDB
     end
 
     def export_struct(struct, disabled: nil)
-      (@structs[@library] ||= []) << struct
+      (@structs[@library] ||= []) << self.resolve_struct(struct)
     end
 
     def export_union(union, disabled: nil)
-      (@unions[@library] ||= []) << union
+      (@unions[@library] ||= []) << self.resolve_union(union)
     end
 
     def export_function(function, disabled: nil)
-      (@functions[@library] ||= []) << function
+      (@functions[@library] ||= []) << self.resolve_function(function)
     end
 
     def finish_library
@@ -117,11 +118,6 @@ module FFIDB
 
     protected
 
-    def format_comment(comment, prefix)
-      prefix = prefix + ' '
-      comment.each_line.map(&:strip).map { |s| s.prepend(prefix) }.join("\n")
-    end
-
     def puts(*args)
       @stream.puts *args
     end
@@ -131,21 +127,95 @@ module FFIDB
     end
 
     ##
-    # @param  [FFIDB::Type] c_type
+    # @param  [String] comment
+    # @param  [String] prefix
     # @return [String]
+    def format_comment(comment, prefix)
+      prefix = prefix + ' '
+      comment.each_line.map(&:strip).map { |s| s.prepend(prefix) }.join("\n")
+    end
+
+    ##
+    # @param  [Function] function
+    # @feturn [Function]
+    def resolve_function(function)
+      function.type = self.resolve_type(function.type)
+      function.parameters.transform_values! do |param|
+        param.type = self.resolve_type(param.type)
+        param
+      end
+      function
+    end
+
+    ##
+    # @param  [Struct] struct
+    # @feturn [Struct]
+    def resolve_struct(struct)
+      struct.fields.each do |field_name, field_type|
+        struct.fields[field_name] = self.resolve_type(field_type)
+      end
+      struct
+    end
+
+    ##
+    # @param  [Union] union
+    # @feturn [Union]
+    def resolve_union(union)
+      self.resolve_struct(union)
+    end
+
+    ##
+    # @param  [Type] type
+    # @return [Type, Symbol]
+    def resolve_type(type)
+      case
+        when type.struct_pointer?
+          name = type.spec.gsub(/^const /, '').gsub(/^struct /, '').gsub(/\s*\*+$/, '')
+          name.to_sym
+        when type.struct? || type.union?
+          type
+        when typedef = lookup_typedef(type.name)
+          case typedef.type.tag
+            when :enum then type.name.to_sym
+            when :struct then (type.pointer? ? type.name : "#{type.name}.by_value").to_sym # FIXME
+            else typedef.type
+          end
+        else type
+      end
+    end
+
+    ##
+    # @param  [Type] type
+    # @return [Symbolic]
+    def lookup_symbol(type)
+      self.lookup_typedef(type.name)
+    end
+
+    ##
+    # @param  [Symbol] type_name
+    # @return [Typedef]
+    def lookup_typedef(type_name)
+      @typedefs && @typedefs[@library] && @typedefs[@library][type_name]
+    end
+
+    ##
+    # @param  [Symbol, Type] c_type
+    # @return [#to_s]
     def struct_type(c_type)
+      return c_type if c_type.is_a?(Symbol) # a resolved typedef
       self.param_type(c_type)
     end
 
     ##
-    # @param  [FFIDB::Type] c_type
-    # @return [String]
+    # @param  [Symbol, Type] c_type
+    # @return [#to_s]
     def param_type(c_type)
+      return c_type if c_type.is_a?(Symbol) # a resolved typedef
       case
+        when type = typemap[c_type.to_s] then type
         when c_type.enum? then typemap['int']
         when c_type.pointer? then typemap['void *']
         when c_type.array? then typemap['void *']
-        when type = typemap[c_type.to_s] then type
         else
           warn "#{$0}: unknown C type #{c_type}, mapping to enum (int)" if debug?
           typemap['int'] # TODO: typedef or enum
