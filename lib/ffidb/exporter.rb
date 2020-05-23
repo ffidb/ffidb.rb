@@ -146,7 +146,9 @@ module FFIDB
         when c_type.pointer? then typemap['void *']
         when c_type.array? then typemap['void *']
         when type = typemap[c_type.to_s] then type
-        else typemap['int'] # TODO: typedef or enum
+        else
+          warn "#{$0}: unknown C type #{c_type}, mapping to enum (int)" if debug?
+          typemap['int'] # TODO: typedef or enum
       end
     end
 
