@@ -20,16 +20,26 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#to_s]
+    def struct_type(c_type)
+      case
+        when c_type.array? then [self.param_type(c_type.array_type), '*', c_type.array_size].join(' ')
+        else self.param_type(c_type)
+      end
+    end
+
+    ##
+    # @param  [FFIDB::Type] c_type
+    # @return [#to_s]
     def param_type(c_type)
       case
-        when c_type.enum? then 'ctypes.c_int'
-        when c_type.array? then [self.param_type(c_type.array_type), '*', c_type.array_size].join(' ')
-        else case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP['void *']
+        when c_type.enum? then TYPE_MAP['int']
+        when c_type.pointer? then TYPE_MAP['void *']
+        when c_type.array? then TYPE_MAP['void *']
+        else case py_type = TYPE_MAP[c_type.to_s] || TYPE_MAP['int']
           when 'None' then py_type
           else "ctypes.#{py_type}"
         end
       end
     end
-    alias_method :struct_type, :param_type
   end # Python
 end # FFIDB::Exporters

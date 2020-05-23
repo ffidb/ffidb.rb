@@ -50,11 +50,12 @@ module FFIDB::Exporters
     # @return [#to_s]
     def ffi_param_type(c_type)
       case
+        when c_type.enum? then TYPE_MAP_FFI['int']
+        when c_type.pointer? then TYPE_MAP_FFI['void *']
         #when c_type.array? then # TODO: https://github.com/dart-lang/sdk/issues/35763
-        when c_type.enum? then :Int32
-        else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI['void *']
+        else TYPE_MAP_FFI[c_type.to_s] || TYPE_MAP_FFI['int']
       end
     end
-    alias_method :ffi_struct_type, :ffi_param_type
+    alias_method :ffi_struct_type, :ffi_param_type # TODO
   end # Dart
 end # FFIDB::Exporters

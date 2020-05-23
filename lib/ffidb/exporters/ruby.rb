@@ -21,13 +21,23 @@ module FFIDB::Exporters
     ##
     # @param  [FFIDB::Type] c_type
     # @return [#inspect]
-    def param_type(c_type)
+    def struct_type(c_type)
       case
-        when c_type.enum? then :int
         when c_type.array? then [self.param_type(c_type.array_type), c_type.array_size]
-        else TYPE_MAP[c_type.to_s] || TYPE_MAP['void *']
+        else self.param_type(c_type)
       end
     end
-    alias_method :struct_type, :param_type
+
+    ##
+    # @param  [FFIDB::Type] c_type
+    # @return [#inspect]
+    def param_type(c_type)
+      case
+        when c_type.enum? then TYPE_MAP['int']
+        when c_type.pointer? then TYPE_MAP['void *']
+        when c_type.array? then TYPE_MAP['void *']
+        else TYPE_MAP[c_type.to_s] || TYPE_MAP['int']
+      end
+    end
   end # Ruby
 end # FFIDB::Exporters

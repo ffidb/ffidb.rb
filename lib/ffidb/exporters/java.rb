@@ -30,10 +30,12 @@ module FFIDB::Exporters
     # @return [#to_s]
     def param_type(c_type)
       case
-        when c_type.enum? then :int
-        else TYPE_MAP[c_type.to_s] || TYPE_MAP['void *']
+        when c_type.enum? then TYPE_MAP['int']
+        when c_type.pointer? then TYPE_MAP['void *']
+        when c_type.array? then TYPE_MAP['void *']
+        else TYPE_MAP[c_type.to_s] || TYPE_MAP['int']
       end
     end
-    alias_method :struct_type, :param_type
+    alias_method :struct_type, :param_type # TODO
   end # Java
 end # FFIDB::Exporters
