@@ -1,5 +1,11 @@
 # This is free and unencumbered software released into the public domain.
 
+##
+# FFI DB Command-Line Interface (CLI).
+module FFIDB; end
+
+require_relative 'ffidb/version'
+
 require_relative 'ffidb/enum'
 require_relative 'ffidb/errors'
 require_relative 'ffidb/exporter'
@@ -21,7 +27,6 @@ require_relative 'ffidb/sysexits'
 require_relative 'ffidb/type'
 require_relative 'ffidb/typedef'
 require_relative 'ffidb/union'
-require_relative 'ffidb/version'
 
 module FFIDB
   HEADER = "This is free and unencumbered software released into the public domain.".freeze

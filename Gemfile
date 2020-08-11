@@ -13,5 +13,6 @@ gem 'thor', '~> 1.0', '>= 1.0.1'
 group :development do
   gem 'rake'
   gem 'rspec'
+  gem 'rubocop', '~> 0.89.1', require: false
   gem 'yard'
 end
